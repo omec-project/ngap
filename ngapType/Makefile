@@ -1,3 +1,7 @@
+# Copyright 2019 Communication Service/Software Laboratory, National Chiao Tung University (free5gc.org)
+#
+# SPDX-License-Identifier: Apache-2.0
+
 .PHONY: install uninstall clean
 
 HOMEASN1DIR = $(HOME)/asn1c
