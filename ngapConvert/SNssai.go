@@ -7,9 +7,9 @@ package ngapConvert
 import (
 	"encoding/hex"
 
-	"github.com/free5gc/ngap/logger"
-	"github.com/free5gc/ngap/ngapType"
-	"github.com/free5gc/openapi/models"
+	"github.com/omec-project/ngap/logger"
+	"github.com/omec-project/ngap/ngapType"
+	"github.com/omec-project/openapi/models"
 )
 
 func SNssaiToModels(ngapSnssai ngapType.SNSSAI) (modelsSnssai models.Snssai) {
