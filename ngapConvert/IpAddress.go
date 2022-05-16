@@ -8,8 +8,8 @@ import (
 	"net"
 
 	"github.com/free5gc/aper"
-	"github.com/free5gc/ngap/logger"
-	"github.com/free5gc/ngap/ngapType"
+	"github.com/omec-project/ngap/logger"
+	"github.com/omec-project/ngap/ngapType"
 )
 
 func IPAddressToString(ipAddr ngapType.TransportLayerAddress) (ipv4Addr, ipv6Addr string) {
