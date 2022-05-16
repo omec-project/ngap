@@ -4,9 +4,9 @@
 
 package ngapType
 
-import "github.com/free5gc/aper"
+import "github.com/omec-project/aper"
 
-// Need to import "github.com/free5gc/aper" if it uses "aper"
+// Need to import "github.com/omec-project/aper" if it uses "aper"
 
 type DRBStatusUL12 struct {
 	ULCOUNTValue              COUNTValueForPDCPSN12                          `aper:"valueExt"`

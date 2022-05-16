@@ -4,7 +4,7 @@
 
 package ngapType
 
-// Need to import "github.com/free5gc/aper" if it uses "aper"
+// Need to import "github.com/omec-project/aper" if it uses "aper"
 
 type HandoverResourceAllocationUnsuccessfulTransfer struct {
 	Cause                  Cause                                                                           `aper:"valueLB:0,valueUB:5"`

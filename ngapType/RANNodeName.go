@@ -4,7 +4,7 @@
 
 package ngapType
 
-// Need to import "github.com/free5gc/aper" if it uses "aper"
+// Need to import "github.com/omec-project/aper" if it uses "aper"
 
 type RANNodeName struct {
 	Value string `aper:"sizeExt,sizeLB:1,sizeUB:150"`

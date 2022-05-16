@@ -4,7 +4,7 @@
 
 package ngapType
 
-// Need to import "github.com/free5gc/aper" if it uses "aper"
+// Need to import "github.com/omec-project/aper" if it uses "aper"
 
 type COUNTValueForPDCPSN12 struct {
 	PDCPSN12     int64                                                  `aper:"valueLB:0,valueUB:4095"`

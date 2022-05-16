@@ -4,9 +4,9 @@
 
 package ngapType
 
-import "github.com/free5gc/aper"
+import "github.com/omec-project/aper"
 
-// Need to import "github.com/free5gc/aper" if it uses "aper"
+// Need to import "github.com/omec-project/aper" if it uses "aper"
 
 type TransportLayerAddress struct {
 	Value aper.BitString `aper:"sizeExt,sizeLB:1,sizeUB:160"`

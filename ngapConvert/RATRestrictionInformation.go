@@ -5,9 +5,9 @@
 package ngapConvert
 
 import (
-	"github.com/free5gc/aper"
-	"github.com/free5gc/ngap/ngapType"
-	"github.com/free5gc/openapi/models"
+	"github.com/omec-project/aper"
+	"github.com/omec-project/ngap/ngapType"
+	"github.com/omec-project/openapi/models"
 )
 
 // TS 38.413 9.3.1.85
