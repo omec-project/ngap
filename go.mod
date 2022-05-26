@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-module github.com/free5gc/ngap
+module github.com/omec-project/ngap
 
 go 1.14
 
 require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
-	github.com/free5gc/aper v1.0.3
-	github.com/free5gc/openapi v1.0.4
+	github.com/omec-project/aper v1.1.0
+	github.com/omec-project/openapi v1.1.0
 	github.com/sirupsen/logrus v1.8.1
 )
