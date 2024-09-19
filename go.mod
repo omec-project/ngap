@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
-	github.com/omec-project/aper v1.1.2
+	github.com/omec-project/aper v1.1.3
 	github.com/omec-project/openapi v1.2.0
 	github.com/sirupsen/logrus v1.8.1
 )
