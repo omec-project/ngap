@@ -14,7 +14,7 @@ import (
 func UEAmbrToInt64(modelAmbr string) int64 {
 	tok := strings.Split(modelAmbr, " ")
 	if ambr, err := strconv.ParseFloat(tok[0], 64); err != nil {
-		logger.NgapLog.Warnf("Parse AMBR failed %+v", err)
+		logger.NgapLog.Warnf("parse AMBR failed %+v", err)
 		return int64(0)
 	} else {
 		return int64(ambr * getUnit(tok[1]))

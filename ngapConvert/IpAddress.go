@@ -42,7 +42,7 @@ func IPAddressToNgap(ipv4Addr, ipv6Addr string) ngapType.TransportLayerAddress {
 	var ipAddr ngapType.TransportLayerAddress
 
 	if ipv4Addr == "" && ipv6Addr == "" {
-		logger.NgapLog.Warningln("IPAddressToNgap: Both ipv4 & ipv6 are nil string")
+		logger.NgapLog.Warnln("IPAddressToNgap: Both ipv4 and ipv6 are nil string")
 		return ipAddr
 	}
 

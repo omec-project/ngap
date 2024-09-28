@@ -16,12 +16,12 @@ func AmfIdToNgap(amfId string) (regionId, setId, ptrId aper.BitString) {
 	setId = HexToBitString(amfId[2:5], 10)
 	tmpByte, err := hex.DecodeString(amfId[4:])
 	if err != nil {
-		logger.NgapLog.Warningln("AmfId From Models To NGAP Error: ", err.Error())
+		logger.NgapLog.Warnf("amfId From Models To NGAP Error: %v", err)
 		return
 	}
 	shiftByte, err := aper.GetBitString(tmpByte, 2, 6)
 	if err != nil {
-		logger.NgapLog.Warningln("AmfId From Models To NGAP Error: ", err.Error())
+		logger.NgapLog.Warnf("amfId From Models To NGAP Error: %v", err)
 		return
 	}
 	ptrId.BitLength = 6

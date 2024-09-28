@@ -27,7 +27,7 @@ func TaiToNgap(tai models.Tai) ngapType.TAI {
 
 	ngapTai.PLMNIdentity = PlmnIdToNgap(*tai.PlmnId)
 	if tac, err := hex.DecodeString(tai.Tac); err != nil {
-		logger.NgapLog.Warnf("Decode TAC failed: %+v", err)
+		logger.NgapLog.Warnf("decode TAC failed: %+v", err)
 	} else {
 		ngapTai.TAC.Value = tac
 	}

@@ -21,7 +21,7 @@ func BitStringToHex(bitString *aper.BitString) (hexString string) {
 func HexToBitString(hexString string, bitLength int) (bitString aper.BitString) {
 	hexLen := len(hexString)
 	if hexLen != (bitLength+3)/4 {
-		logger.NgapLog.Warningln("hexLen[", hexLen, "] doesn't match bitLength[", bitLength, "]")
+		logger.NgapLog.Warnf("hexLen[%d] doesn't match bitLength[%d]", hexLen, bitLength)
 		return
 	}
 	if hexLen%2 == 1 {
@@ -44,7 +44,7 @@ func HexToBitString(hexString string, bitLength int) (bitString aper.BitString) 
 func ByteToBitString(byteArray []byte, bitLength int) (bitString aper.BitString) {
 	byteLen := (bitLength + 7) / 8
 	if byteLen > len(byteArray) {
-		logger.NgapLog.Warningln("bitLength[", bitLength, "] is beyond byteArray size[", len(byteArray), "]")
+		logger.NgapLog.Warnf("bitLength[%d] is beyond byteArray size[%d]", bitLength, len(byteArray))
 		return
 	}
 	bitString.Bytes = byteArray
