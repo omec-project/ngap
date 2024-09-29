@@ -34,6 +34,7 @@ func init() {
 	config.EncoderConfig.CallerKey = "caller"
 	config.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
 	config.EncoderConfig.MessageKey = "message"
+	config.EncoderConfig.StacktraceKey = ""
 
 	var err error
 	log, err = config.Build()
