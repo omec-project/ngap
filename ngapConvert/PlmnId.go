@@ -37,7 +37,7 @@ func PlmnIdToNgap(modelsPlmnid models.PlmnId) ngapType.PLMNIdentity {
 
 	var ngapPlmnId ngapType.PLMNIdentity
 	if plmnId, err := hex.DecodeString(hexString); err != nil {
-		logger.NgapLog.Warnf("Decode plmn failed: %+v", err)
+		logger.NgapLog.Warnf("decode plmn failed: %+v", err)
 	} else {
 		ngapPlmnId.Value = plmnId
 	}

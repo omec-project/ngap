@@ -23,7 +23,7 @@ func TraceDataToNgap(traceData models.TraceData, trsr string) ngapType.TraceActi
 	var traceActivation ngapType.TraceActivation
 
 	if len(trsr) != 4 {
-		logger.NgapLog.Warningln("Trace Recording Session Reference should be 2 octets")
+		logger.NgapLog.Warnln("trace Recording Session Reference should be 2 octets")
 		return traceActivation
 	}
 
@@ -31,7 +31,7 @@ func TraceDataToNgap(traceData models.TraceData, trsr string) ngapType.TraceActi
 	subStringSlice := strings.Split(traceData.TraceRef, "-")
 
 	if len(subStringSlice) != 2 {
-		logger.NgapLog.Warningln("TraceRef format is not correct")
+		logger.NgapLog.Warnln("traceRef format is not correct")
 		return traceActivation
 	}
 
@@ -40,7 +40,7 @@ func TraceDataToNgap(traceData models.TraceData, trsr string) ngapType.TraceActi
 	plmnID.Mnc = subStringSlice[0][3:]
 	var traceID []byte
 	if traceIDTmp, err := hex.DecodeString(subStringSlice[1]); err != nil {
-		logger.NgapLog.Warnf("")
+		logger.NgapLog.Warnf("traceIDTmp is empty")
 	} else {
 		traceID = traceIDTmp
 	}
@@ -49,7 +49,7 @@ func TraceDataToNgap(traceData models.TraceData, trsr string) ngapType.TraceActi
 	traceReference := append(tmp.Value, traceID...)
 	var trsrNgap []byte
 	if trsrNgapTmp, err := hex.DecodeString(trsr); err != nil {
-		logger.NgapLog.Warnf("Decode trsr failed: %+v", err)
+		logger.NgapLog.Warnf("decode trsr failed: %+v", err)
 	} else {
 		trsrNgap = trsrNgapTmp
 	}
@@ -61,7 +61,7 @@ func TraceDataToNgap(traceData models.TraceData, trsr string) ngapType.TraceActi
 	// Interfaces To Trace
 	var interfacesToTrace []byte
 	if interfacesToTraceTmp, err := hex.DecodeString(traceData.InterfaceList); err != nil {
-		logger.NgapLog.Warnf("Decode Interface failed: %+v", err)
+		logger.NgapLog.Warnf("decode Interface failed: %+v", err)
 	} else {
 		interfacesToTrace = interfacesToTraceTmp
 	}

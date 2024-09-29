@@ -27,7 +27,7 @@ func SNssaiToNgap(modelsSnssai models.Snssai) ngapType.SNSSAI {
 	if modelsSnssai.Sd != "" {
 		ngapSnssai.SD = new(ngapType.SD)
 		if sdTmp, err := hex.DecodeString(modelsSnssai.Sd); err != nil {
-			logger.NgapLog.Warnf("Decode snssai.sd failed: %+v", err)
+			logger.NgapLog.Warnf("decode snssai.sd failed: %+v", err)
 		} else {
 			ngapSnssai.SD.Value = sdTmp
 		}
