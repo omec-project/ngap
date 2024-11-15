@@ -1,6 +1,6 @@
 module github.com/omec-project/ngap
 
-go 1.21
+go 1.23
 
 require (
 	github.com/omec-project/aper v1.2.1
