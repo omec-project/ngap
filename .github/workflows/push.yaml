@@ -13,12 +13,6 @@ jobs:
   tag-github:
     uses: omec-project/.github/.github/workflows/tag-github.yml@main
 
-  release-image:
-    uses: omec-project/.github/.github/workflows/release-image.yml@main
-    with:
-      branch_name: ${{ github.ref }}
-    secrets: inherit
-
   update-version:
     needs: tag-github
     uses: omec-project/.github/.github/workflows/update-version.yml@main
