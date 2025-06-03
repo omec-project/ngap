@@ -2,8 +2,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang-jwt/jwt/v5 v5.2.2 h1:Rl4B7itRWVtYIHFrSNd7vhTiz9UpLdi6gZhZ3wEeDy8=
 github.com/golang-jwt/jwt/v5 v5.2.2/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
-github.com/omec-project/aper v1.3.0 h1:g7YYCImt9zjDKOFqGbnr/WCoMlk+pp661c9NaduWLEc=
-github.com/omec-project/aper v1.3.0/go.mod h1:DITqHfysnusm7tbQtPZZGajmuLoePaPV0x34oZWd/Yo=
+github.com/omec-project/aper v1.3.1 h1:3Vyqn2xQEulzsQ9JganXqxbR1E2IM7oUm4IW1HiPnr0=
+github.com/omec-project/aper v1.3.1/go.mod h1:W0i+XhbXHeeLQ4BhMmAS8h83yZ5pnD3w0sdIlnuPS70=
 github.com/omec-project/openapi v1.4.1 h1:F9RAjS5at/xcd2Iadl4/V0I3veYnH2WiFc3B7bj6Y8k=
 github.com/omec-project/openapi v1.4.1/go.mod h1:RVoo/FjKWlqg95hRRqBhQYzoCUZlE+h6/u4vj8bP2Jo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
