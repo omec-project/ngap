@@ -41,25 +41,23 @@ func IPAddressToString(ipAddr ngapType.TransportLayerAddress) (ipv4Addr, ipv6Add
 func IPAddressToNgap(ipv4Addr, ipv6Addr string) ngapType.TransportLayerAddress {
 	var ipAddr ngapType.TransportLayerAddress
 
-	if ipv4Addr == "" && ipv6Addr == "" {
-		logger.NgapLog.Warnln("IPAddressToNgap: Both ipv4 and ipv6 are nil string")
-		return ipAddr
-	}
-
-	if ipv4Addr != "" && ipv6Addr != "" { // Both ipv4 & ipv6
+	switch {
+	case ipv4Addr != "" && ipv6Addr != "":
+		// Both ipv4 & ipv6
 		ipv4NetIP := net.ParseIP(ipv4Addr).To4()
 		ipv6NetIP := net.ParseIP(ipv6Addr).To16()
 
 		ipBytes := []byte{ipv4NetIP[0], ipv4NetIP[1], ipv4NetIP[2], ipv4NetIP[3]}
-		for i := 0; i < 16; i++ {
-			ipBytes = append(ipBytes, ipv6NetIP[i])
+		for _, byteTmp := range ipv6NetIP[:16] {
+			ipBytes = append(ipBytes, byteTmp)
 		}
 
 		ipAddr.Value = aper.BitString{
 			Bytes:     ipBytes,
 			BitLength: 160,
 		}
-	} else if ipv4Addr != "" && ipv6Addr == "" { // ipv4
+	case ipv4Addr != "" && ipv6Addr == "":
+		// ipv4
 		ipv4NetIP := net.ParseIP(ipv4Addr).To4()
 
 		ipBytes := []byte{ipv4NetIP[0], ipv4NetIP[1], ipv4NetIP[2], ipv4NetIP[3]}
@@ -68,18 +66,21 @@ func IPAddressToNgap(ipv4Addr, ipv6Addr string) ngapType.TransportLayerAddress {
 			Bytes:     ipBytes,
 			BitLength: 32,
 		}
-	} else { // ipv6
+	case ipv4Addr == "" && ipv6Addr != "":
+		// ipv6
 		ipv6NetIP := net.ParseIP(ipv6Addr).To16()
 
 		ipBytes := []byte{}
-		for i := 0; i < 16; i++ {
-			ipBytes = append(ipBytes, ipv6NetIP[i])
+		for _, byteTmp := range ipv6NetIP[:16] {
+			ipBytes = append(ipBytes, byteTmp)
 		}
 
 		ipAddr.Value = aper.BitString{
 			Bytes:     ipBytes,
 			BitLength: 128,
 		}
+	default:
+		logger.NgapLog.Warnln("IPAddressToNgap: Both ipv4 and ipv6 are empty string")
 	}
 
 	return ipAddr

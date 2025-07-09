@@ -6,13 +6,13 @@ package ngapConvert
 
 import (
 	"github.com/omec-project/aper"
+	"github.com/omec-project/ngap/logger"
 	"github.com/omec-project/ngap/ngapType"
 	"github.com/omec-project/openapi/models"
 )
 
 func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNodeId) {
-	present := ranNodeId.Present
-	switch present {
+	switch ranNodeId.Present {
 	case ngapType.GlobalRANNodeIDPresentGlobalGNBID:
 		ranId.GNbId = new(models.GNbId)
 		gnbId := ranId.GNbId
@@ -28,15 +28,18 @@ func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNo
 		ngapNgENBID := ranNodeId.GlobalNgENBID
 		plmnid := PlmnIdToModels(ngapNgENBID.PLMNIdentity)
 		ranId.PlmnId = &plmnid
-		if ngapNgENBID.NgENBID.Present == ngapType.NgENBIDPresentMacroNgENBID {
+		switch ngapNgENBID.NgENBID.Present {
+		case ngapType.NgENBIDPresentMacroNgENBID:
 			macroNgENBID := ngapNgENBID.NgENBID.MacroNgENBID
 			ranId.NgeNbId = "MacroNGeNB-" + BitStringToHex(macroNgENBID)
-		} else if ngapNgENBID.NgENBID.Present == ngapType.NgENBIDPresentShortMacroNgENBID {
+		case ngapType.NgENBIDPresentShortMacroNgENBID:
 			shortMacroNgENBID := ngapNgENBID.NgENBID.ShortMacroNgENBID
 			ranId.NgeNbId = "SMacroNGeNB-" + BitStringToHex(shortMacroNgENBID)
-		} else if ngapNgENBID.NgENBID.Present == ngapType.NgENBIDPresentLongMacroNgENBID {
+		case ngapType.NgENBIDPresentLongMacroNgENBID:
 			longMacroNgENBID := ngapNgENBID.NgENBID.LongMacroNgENBID
 			ranId.NgeNbId = "LMacroNGeNB-" + BitStringToHex(longMacroNgENBID)
+		default:
+			logger.NgapLog.Warnf("RanIdToModels: Unexpected NgENBID present type %d", ngapNgENBID.NgENBID.Present)
 		}
 	case ngapType.GlobalRANNodeIDPresentGlobalN3IWFID:
 		ngapN3IWFID := ranNodeId.GlobalN3IWFID
@@ -46,6 +49,8 @@ func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNo
 			choiceN3IWFID := ngapN3IWFID.N3IWFID.N3IWFID
 			ranId.N3IwfId = BitStringToHex(choiceN3IWFID)
 		}
+	default:
+		logger.NgapLog.Warnf("RanIdToModels: Unexpected GlobalRANNodeID present type %d", ranNodeId.Present)
 	}
 
 	return ranId
