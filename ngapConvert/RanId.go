@@ -6,13 +6,13 @@ package ngapConvert
 
 import (
 	"github.com/omec-project/aper"
+	"github.com/omec-project/ngap/logger"
 	"github.com/omec-project/ngap/ngapType"
 	"github.com/omec-project/openapi/models"
 )
 
 func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNodeId) {
-	present := ranNodeId.Present
-	switch present {
+	switch ranNodeId.Present {
 	case ngapType.GlobalRANNodeIDPresentGlobalGNBID:
 		ranId.GNbId = new(models.GNbId)
 		gnbId := ranId.GNbId
@@ -38,6 +38,8 @@ func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNo
 		case ngapType.NgENBIDPresentLongMacroNgENBID:
 			longMacroNgENBID := ngapNgENBID.NgENBID.LongMacroNgENBID
 			ranId.NgeNbId = "LMacroNGeNB-" + BitStringToHex(longMacroNgENBID)
+		default:
+			logger.NgapLog.Warnf("RanIdToModels: Unexpected NgENBID present type %d", ngapNgENBID.NgENBID.Present)
 		}
 	case ngapType.GlobalRANNodeIDPresentGlobalN3IWFID:
 		ngapN3IWFID := ranNodeId.GlobalN3IWFID
@@ -47,6 +49,8 @@ func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNo
 			choiceN3IWFID := ngapN3IWFID.N3IWFID.N3IWFID
 			ranId.N3IwfId = BitStringToHex(choiceN3IWFID)
 		}
+	default:
+		logger.NgapLog.Warnf("RanIdToModels: Unexpected GlobalRANNodeID present type %d", ranNodeId.Present)
 	}
 
 	return ranId
