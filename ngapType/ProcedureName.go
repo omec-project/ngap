@@ -115,6 +115,6 @@ func ProcedureName(code int64) string {
 	case ProcedureCodeSecondaryRATDataUsageReport:
 		return "SecondaryRATDataUsageReport"
 	default:
-		return fmt.Sprintf("ProcedureCode%d", code)
+		return fmt.Sprintf("unknown procedure code %d", code)
 	}
 }
