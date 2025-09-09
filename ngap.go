@@ -14,7 +14,7 @@ import (
 )
 
 // TS 38.412
-const PPID uint32 = 0x3c000000
+const PPID uint32 = 60
 
 // Decoder is to decode raw data to NGAP pdu pointer with PER Aligned
 func Decoder(b []byte) (pdu *ngapType.NGAPPDU, err error) {
