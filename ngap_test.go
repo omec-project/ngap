@@ -7,8 +7,8 @@ package ngap_test
 import (
 	"testing"
 
-	"github.com/omec-project/aper"
 	"github.com/omec-project/ngap"
+	"github.com/omec-project/ngap/aper"
 	"github.com/omec-project/ngap/ngapType"
 )
 

@@ -4,9 +4,9 @@
 
 package ngapType
 
-import "github.com/omec-project/aper"
+import "github.com/omec-project/ngap/aper"
 
-// Need to import "github.com/omec-project/aper" if it uses "aper"
+// Need to import "github.com/omec-project/ngap/aper" if it uses "aper"
 
 type VolumeTimedReportItem struct {
 	StartTimeStamp aper.OctetString                                       `aper:"sizeLB:4,sizeUB:4"`

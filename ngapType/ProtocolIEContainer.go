@@ -4,7 +4,7 @@
 
 package ngapType
 
-// Need to import "github.com/omec-project/aper" if it uses "aper"
+// Need to import "github.com/omec-project/ngap/aper" if it uses "aper"
 
 /* Sequence of = 35, FULL Name = struct ProtocolIE_Container_6655P0 */
 /* PDUSessionResourceSetupRequestIEs */

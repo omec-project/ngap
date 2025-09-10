@@ -4,7 +4,7 @@
 
 package ngapType
 
-// Need to import "github.com/omec-project/aper" if it uses "aper"
+// Need to import "github.com/omec-project/ngap/aper" if it uses "aper"
 
 type DRBStatusDL12 struct {
 	DLCOUNTValue COUNTValueForPDCPSN12                          `aper:"valueExt"`
