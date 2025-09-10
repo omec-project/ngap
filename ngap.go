@@ -13,8 +13,10 @@ import (
 	"github.com/omec-project/ngap/ngapType"
 )
 
-// TS 38.412
-const PPID uint32 = 0x3c000000
+// PPID is the decimal value as specified in TS 38.412.
+// Note: Endianness handling is delegated to the network functions.
+// The value is set in decimal to match the specification.
+const PPID uint32 = 60
 
 // Decoder is to decode raw data to NGAP pdu pointer with PER Aligned
 func Decoder(b []byte) (pdu *ngapType.NGAPPDU, err error) {
