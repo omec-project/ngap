@@ -4,7 +4,7 @@
 
 package ngapType
 
-// Need to import "github.com/omec-project/aper" if it uses "aper"
+// Need to import "github.com/omec-project/ngap/aper" if it uses "aper"
 
 type UserPlaneSecurityInformation struct {
 	SecurityResult     SecurityResult                                                `aper:"valueExt"`

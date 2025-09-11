@@ -12,6 +12,7 @@ import (
 
 var (
 	log         *zap.Logger
+	AperLog     *zap.SugaredLogger
 	NgapLog     *zap.SugaredLogger
 	atomicLevel zap.AtomicLevel
 )
@@ -42,6 +43,7 @@ func init() {
 		panic(err)
 	}
 
+	AperLog = log.Sugar().With("component", "LIB", "category", "APER")
 	NgapLog = log.Sugar().With("component", "LIB", "category", "NGAP")
 }
 
