@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/omec-project/ngap/logger"
-	"github.com/stretchr/testify/assert"
 )
 
 var perTestTraceLevel = 2
@@ -939,8 +938,12 @@ func TestOpenType(t *testing.T) {
 	}
 	var x openTypeTest1
 	err := Unmarshal([]byte{0x11, 0x08, 0x06, 0x88, 0xFE, 0x06, 0xEC, 0x00, 0x05, 0xD8}, &x)
-	assert.NoError(t, err)
-	assert.Equal(t, 0, x.Value.Present)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+	if x.Value.Present != 0 {
+		t.Errorf("Expected x.Value.Present to be 0, but got: %d", x.Value.Present)
+	}
 }
 
 // BOOLEAN TEST
