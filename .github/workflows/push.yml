@@ -19,7 +19,7 @@ jobs:
       contents: write
       actions: read
       id-token: write
-    uses: omec-project/.github/.github/workflows/tag-github.yml@53d4a413210952112117fc4c6e2cf384f09188af # v0.0.2
+    uses: omec-project/.github/.github/workflows/tag-github.yml@76c248f1621bfe102956c558ea8cecfe5df143bf # v0.0.3
     secrets: inherit
 
   update-version:
