@@ -1,9 +1,9 @@
 module github.com/omec-project/ngap
 
-go 1.24.0
+go 1.25.0
 
 require (
-	github.com/omec-project/openapi v1.7.0
+	github.com/omec-project/openapi v1.7.1
 	go.uber.org/zap v1.27.1
 )
 
