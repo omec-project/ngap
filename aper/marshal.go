@@ -791,11 +791,6 @@ func (pd *perRawBitData) makeField(v reflect.Value, params fieldParameters) erro
 	return fmt.Errorf("unsupported: %s", v.Type().String())
 }
 
-// Marshal returns the ASN.1 encoding of val.
-func Marshal(val any) ([]byte, error) {
-	return MarshalWithParams(val, "")
-}
-
 // MarshalWithParams allows field parameters to be specified for the
 // top-level element. The form of the params is the same as the field tags.
 func MarshalWithParams(val any, params string) ([]byte, error) {

@@ -14,11 +14,6 @@ import (
 	"github.com/omec-project/openapi/models"
 )
 
-func TraceDataToModels(traceActivation ngapType.TraceActivation) (traceData models.TraceData) {
-	// TODO: finish this function when need
-	return
-}
-
 func TraceDataToNgap(traceData models.TraceData, trsr string) ngapType.TraceActivation {
 	var traceActivation ngapType.TraceActivation
 

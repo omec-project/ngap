@@ -47,10 +47,6 @@ func init() {
 	NgapLog = log.Sugar().With("component", "LIB", "category", "NGAP")
 }
 
-func GetLogger() *zap.Logger {
-	return log
-}
-
 // SetLogLevel: set the log level (panic|fatal|error|warn|info|debug)
 func SetLogLevel(level zapcore.Level) {
 	NgapLog.Infoln("set log level:", level)
