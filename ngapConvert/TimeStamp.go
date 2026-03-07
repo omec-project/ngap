@@ -47,8 +47,3 @@ func TimeStampToInt32(timeStampNgap aper.OctetString) (timeStamp int32) {
 	timeStamp = int32(binary.BigEndian.Uint32(timeStampNgap))
 	return
 }
-
-func TimeStampToNgap(timeStamp int32) (timeStampNgap aper.OctetString) {
-	// TODO: finish this function when need
-	return
-}

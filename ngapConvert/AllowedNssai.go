@@ -18,14 +18,3 @@ func AllowedNssaiToNgap(allowedNssaiModels []models.AllowedSnssai) (allowedNssai
 	}
 	return
 }
-
-func AllowedNssaiToModels(allowedNssaiNgap ngapType.AllowedNSSAI) (allowedNssaiModels []models.AllowedSnssai) {
-	for _, item := range allowedNssaiNgap.List {
-		snssai := SNssaiToModels(item.SNSSAI)
-		allowedSnssai := models.AllowedSnssai{
-			AllowedSnssai: &snssai,
-		}
-		allowedNssaiModels = append(allowedNssaiModels, allowedSnssai)
-	}
-	return
-}
