@@ -5,19 +5,24 @@
 package ngapConvert
 
 import (
+	"fmt"
+
 	"github.com/omec-project/ngap/aper"
 	"github.com/omec-project/ngap/logger"
 	"github.com/omec-project/ngap/ngapType"
 	"github.com/omec-project/openapi/models"
 )
 
-func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNodeId) {
+func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNodeId, err error) {
 	switch ranNodeId.Present {
 	case ngapType.GlobalRANNodeIDPresentGlobalGNBID:
 		ranId.GNbId = new(models.GNbId)
 		gnbId := ranId.GNbId
 		ngapGnbId := ranNodeId.GlobalGNBID
-		plmnid := PlmnIdToModels(ngapGnbId.PLMNIdentity)
+		plmnid, err := PlmnIdToModels(ngapGnbId.PLMNIdentity)
+		if err != nil {
+			return models.GlobalRanNodeId{}, fmt.Errorf("invalid GlobalGNBID PLMN identity: %w", err)
+		}
 		ranId.PlmnId = &plmnid
 		if ngapGnbId.GNBID.Present == ngapType.GNBIDPresentGNBID {
 			choiceGnbId := ngapGnbId.GNBID.GNBID
@@ -26,7 +31,10 @@ func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNo
 		}
 	case ngapType.GlobalRANNodeIDPresentGlobalNgENBID:
 		ngapNgENBID := ranNodeId.GlobalNgENBID
-		plmnid := PlmnIdToModels(ngapNgENBID.PLMNIdentity)
+		plmnid, err := PlmnIdToModels(ngapNgENBID.PLMNIdentity)
+		if err != nil {
+			return models.GlobalRanNodeId{}, fmt.Errorf("invalid GlobalNgENBID PLMN identity: %w", err)
+		}
 		ranId.PlmnId = &plmnid
 		switch ngapNgENBID.NgENBID.Present {
 		case ngapType.NgENBIDPresentMacroNgENBID:
@@ -43,7 +51,10 @@ func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNo
 		}
 	case ngapType.GlobalRANNodeIDPresentGlobalN3IWFID:
 		ngapN3IWFID := ranNodeId.GlobalN3IWFID
-		plmnid := PlmnIdToModels(ngapN3IWFID.PLMNIdentity)
+		plmnid, err := PlmnIdToModels(ngapN3IWFID.PLMNIdentity)
+		if err != nil {
+			return models.GlobalRanNodeId{}, fmt.Errorf("invalid GlobalN3IWFID PLMN identity: %w", err)
+		}
 		ranId.PlmnId = &plmnid
 		if ngapN3IWFID.N3IWFID.Present == ngapType.N3IWFIDPresentN3IWFID {
 			choiceN3IWFID := ngapN3IWFID.N3IWFID.N3IWFID
@@ -53,7 +64,7 @@ func RanIdToModels(ranNodeId ngapType.GlobalRANNodeID) (ranId models.GlobalRanNo
 		logger.NgapLog.Warnf("RanIdToModels: Unexpected GlobalRANNodeID present type %d", ranNodeId.Present)
 	}
 
-	return ranId
+	return ranId, nil
 }
 
 func RanIDToNgap(modelsRanNodeId models.GlobalRanNodeId) ngapType.GlobalRANNodeID {

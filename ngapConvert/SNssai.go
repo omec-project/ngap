@@ -6,18 +6,25 @@ package ngapConvert
 
 import (
 	"encoding/hex"
+	"fmt"
 
 	"github.com/omec-project/ngap/logger"
 	"github.com/omec-project/ngap/ngapType"
 	"github.com/omec-project/openapi/models"
 )
 
-func SNssaiToModels(ngapSnssai ngapType.SNSSAI) (modelsSnssai models.Snssai) {
+func SNssaiToModels(ngapSnssai ngapType.SNSSAI) (modelsSnssai models.Snssai, err error) {
+	if len(ngapSnssai.SST.Value) != 1 {
+		return models.Snssai{}, fmt.Errorf("invalid S-NSSAI SST length %d", len(ngapSnssai.SST.Value))
+	}
 	modelsSnssai.Sst = int32(ngapSnssai.SST.Value[0])
 	if ngapSnssai.SD != nil {
+		if len(ngapSnssai.SD.Value) != 3 {
+			return models.Snssai{}, fmt.Errorf("invalid S-NSSAI SD length %d", len(ngapSnssai.SD.Value))
+		}
 		modelsSnssai.Sd = hex.EncodeToString(ngapSnssai.SD.Value)
 	}
-	return
+	return modelsSnssai, nil
 }
 
 func SNssaiToNgap(modelsSnssai models.Snssai) ngapType.SNSSAI {
