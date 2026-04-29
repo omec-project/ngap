@@ -169,4 +169,5 @@ const (
 	ProtocolIEIDSecurityResult                             int64 = 156
 	ProtocolIEIDENDCSONConfigurationTransferDL             int64 = 157
 	ProtocolIEIDENDCSONConfigurationTransferUL             int64 = 158
+	ProtocolIEIDNRNTNTAIInformation                        int64 = 287
 )
