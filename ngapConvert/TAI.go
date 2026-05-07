@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/omec-project/ngap/ngapType"
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2/models"
 )
 
 func TaiToModels(tai ngapType.TAI) (models.Tai, error) {
@@ -19,7 +19,7 @@ func TaiToModels(tai ngapType.TAI) (models.Tai, error) {
 	if err != nil {
 		return models.Tai{}, fmt.Errorf("invalid TAI PLMN identity: %w", err)
 	}
-	modelsTai.PlmnId = &plmnID
+	modelsTai.PlmnId = plmnID
 	modelsTai.Tac = hex.EncodeToString(tai.TAC.Value)
 
 	return modelsTai, nil

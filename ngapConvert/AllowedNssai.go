@@ -6,13 +6,13 @@ package ngapConvert
 
 import (
 	"github.com/omec-project/ngap/ngapType"
-	"github.com/omec-project/openapi/models"
+	"github.com/omec-project/openapi/v2/models"
 )
 
 func AllowedNssaiToNgap(allowedNssaiModels []models.AllowedSnssai) (allowedNssaiNgap ngapType.AllowedNSSAI) {
 	for _, allowedSnssai := range allowedNssaiModels {
 		item := ngapType.AllowedNSSAIItem{
-			SNSSAI: SNssaiToNgap(*allowedSnssai.AllowedSnssai),
+			SNSSAI: SNssaiToNgap(allowedSnssai.AllowedSnssai),
 		}
 		allowedNssaiNgap.List = append(allowedNssaiNgap.List, item)
 	}
