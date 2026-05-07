@@ -8,9 +8,9 @@ import (
 	"encoding/hex"
 	"strings"
 
-	"github.com/omec-project/ngap/aper"
-	"github.com/omec-project/ngap/logger"
-	"github.com/omec-project/ngap/ngapType"
+	"github.com/omec-project/ngap/v2/aper"
+	"github.com/omec-project/ngap/v2/logger"
+	"github.com/omec-project/ngap/v2/ngapType"
 	"github.com/omec-project/openapi/v2/models"
 )
 

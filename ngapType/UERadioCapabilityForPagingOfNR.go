@@ -4,7 +4,7 @@
 
 package ngapType
 
-import "github.com/omec-project/ngap/aper"
+import "github.com/omec-project/ngap/v2/aper"
 
 // Need to import "github.com/omec-project/ngap/aper" if it uses "aper"
 

@@ -1,4 +1,4 @@
-module github.com/omec-project/ngap
+module github.com/omec-project/ngap/v2
 
 go 1.25.0
 

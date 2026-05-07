@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"github.com/omec-project/ngap/logger"
+	"github.com/omec-project/ngap/v2/logger"
 )
 
 const (
