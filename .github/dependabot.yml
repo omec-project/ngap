@@ -7,13 +7,13 @@
 version: 2
 updates:
 
-  # - package-ecosystem: "gomod"
-  #   directory: "/"
-  #   schedule:
-  #     interval: "weekly"
-  #     day: "thursday"
-  #     time: "21:00"
-  #     timezone: "America/Los_Angeles"
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "21:00"
+      timezone: "America/Los_Angeles"
 
   - package-ecosystem: github-actions
     directory: /
