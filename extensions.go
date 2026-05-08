@@ -4,7 +4,7 @@
 
 package ngap
 
-import "github.com/omec-project/ngap/ngapType"
+import "github.com/omec-project/ngap/v2/ngapType"
 
 // HasUserLocationInformationNRExtension reports whether the given
 // UserLocationInformationNR carries a protocol extension whose

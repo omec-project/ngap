@@ -7,8 +7,8 @@ package ngap_test
 import (
 	"testing"
 
-	"github.com/omec-project/ngap"
-	"github.com/omec-project/ngap/ngapType"
+	"github.com/omec-project/ngap/v2"
+	"github.com/omec-project/ngap/v2/ngapType"
 )
 
 func TestHasUserLocationInformationNRExtension(t *testing.T) {
