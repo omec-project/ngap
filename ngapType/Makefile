@@ -9,7 +9,7 @@ HOMEASN1DIR = $(HOME)/asn1c
 ASN1FILE = ../support/15.2.0/38413.asn
 
 COMPILELANG = -lang=Go
-FLAGS = -pdu=all -fcompound-names -findirect-choice -fno-include-deps $(COMPILELANG) 
+FLAGS = -pdu=all -fcompound-names -findirect-choice -fno-include-deps $(COMPILELANG)
 
 all:
 		$(HOMEASN1DIR)/asn1c/asn1c $(FLAGS) $(ASN1FILE)
@@ -19,5 +19,5 @@ install:
 clean:
 		rm -f *.go
 
-uninstall: 
+uninstall:
 		rm -rf $(HOMEASN1DIR)
