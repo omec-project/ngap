@@ -39,4 +39,3 @@ When using this project:
 ## Contact
 
 1. #sdcore-dev channel in [Aether Community Slack](https://aether5g-project.slack.com)
-
