@@ -13,7 +13,7 @@ import (
 type fieldParameters struct {
 	optional            bool   // true iff the type has OPTIONAL tag.
 	sizeExtensible      bool   // true iff the size can be extensed.
-	valueExtensible     bool   // true iff the value can be extensed.
+	valueExtensible     bool   // true iff the value is extensible, including CHOICE and extensible SEQUENCE/SET preamble bits.
 	sizeLowerBound      *int64 // a sizeLowerBound is the minimum size of type constraint(maybe nil).
 	sizeUpperBound      *int64 // a sizeUpperBound is the maximum size of type constraint(maybe nil).
 	valueLowerBound     *int64 // a valueLowerBound is the minimum value of type constraint(maybe nil).

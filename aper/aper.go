@@ -663,7 +663,7 @@ func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 	if pd.byteOffset == uint64(len(pd.bytes)) {
 		return fmt.Errorf("sequence truncated")
 	}
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		ptr := reflect.New(fieldType.Elem())
 		v.Set(ptr)
 		return parseField(v.Elem(), pd, params)

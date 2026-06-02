@@ -30,7 +30,7 @@ func SNssaiToModels(ngapSnssai ngapType.SNSSAI) (modelsSnssai models.Snssai, err
 
 func SNssaiToNgap(modelsSnssai models.Snssai) ngapType.SNSSAI {
 	var ngapSnssai ngapType.SNSSAI
-	ngapSnssai.SST.Value = []byte{byte(modelsSnssai.Sst)}
+	ngapSnssai.SST.Value = []byte{byte(modelsSnssai.GetSst())}
 
 	if modelsSnssai.GetSd() != "" {
 		ngapSnssai.SD = new(ngapType.SD)

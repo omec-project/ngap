@@ -676,7 +676,7 @@ func (pd *perRawBitData) makeField(v reflect.Value, params fieldParameters) erro
 		var optionalCount uint
 		var optionalPresents uint64
 		var sequenceType bool
-		// struct extensive TODO: support extensed type
+		// For SEQUENCE/SET, valueExtensible carries the extensibility preamble bit.
 		if params.valueExtensible {
 			perTrace(2, fmt.Sprintf("Encoding Value Extensive Bit : %t", false))
 			if err := pd.putBitsValue(0, 1); err != nil {
