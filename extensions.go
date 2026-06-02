@@ -6,25 +6,14 @@ package ngap
 
 import "github.com/omec-project/ngap/v2/ngapType"
 
-// HasUserLocationInformationNRExtension reports whether the given
-// UserLocationInformationNR carries a protocol extension whose
-// identifier matches the supplied id.
+// FindUserLocationInformationNRNTNTAIInformation returns the decoded
+// NRNTNTAIInformation protocol extension carried by loc, if present.
 //
-// NGAP shares a single integer numbering space between ProtocolIE-ID
-// and ProtocolExtensionID, so any ProtocolIEID* constant from this
-// package is a valid id regardless of whether the same identifier is
-// also used as a ProtocolIE-ID in another context.
-//
-// A nil UserLocationInformationNR or a nil IEExtensions container both
-// yield false.
-func HasUserLocationInformationNRExtension(loc *ngapType.UserLocationInformationNR, id int64) bool {
+// A nil UserLocationInformationNR, a nil IEExtensions container, or a
+// location that does not carry the typed extension yields nil.
+func FindUserLocationInformationNRNTNTAIInformation(loc *ngapType.UserLocationInformationNR) *ngapType.NRNTNTAIInformation {
 	if loc == nil || loc.IEExtensions == nil {
-		return false
+		return nil
 	}
-	for _, ext := range loc.IEExtensions.List {
-		if ext.Id.Value == id {
-			return true
-		}
-	}
-	return false
+	return loc.IEExtensions.FindNRNTNTAIInformation()
 }

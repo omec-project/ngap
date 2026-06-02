@@ -87,6 +87,14 @@ func TestSimplePDUDecoding(t *testing.T) {
 		t.Errorf("Could not decode simple PDU bytes: %v; got error: %v\n", pdu_bytes, err)
 	}
 
+	if pdu.InitiatingMessage == nil || pdu.InitiatingMessage.Value.NGSetup == nil {
+		t.Fatalf("Decoded PDU missing NGSetup: %+v", pdu)
+	}
+
+	if len(pdu.InitiatingMessage.Value.NGSetup.ProtocolIEs.List) == 0 {
+		t.Fatalf("Decoded PDU missing ProtocolIEs: %+v", pdu)
+	}
+
 	ie := pdu.InitiatingMessage.Value.NGSetup.ProtocolIEs.List[0]
 	plmn := ie.Value.GlobalRANNodeID.GlobalGNBID.PLMNIdentity.Value
 
