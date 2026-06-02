@@ -4,20 +4,20 @@
 
 .PHONY: install uninstall clean
 
-HOMEASN1DIR = $(HOME)/asn1c
+ROOTDIR = ../..
+ASN1CDIR = $(ROOTDIR)/asn1c
 
-ASN1FILE = ../support/15.2.0/38413.asn
+ASN1FILE = 38413-i10.asn1
 
-COMPILELANG = -lang=Go
+COMPILELANG = -gen-Go
 FLAGS = -pdu=all -fcompound-names -findirect-choice -fno-include-deps $(COMPILELANG)
 
 all:
-		$(HOMEASN1DIR)/asn1c/asn1c $(FLAGS) $(ASN1FILE)
+		$(ASN1CDIR)/asn1c/asn1c $(FLAGS) $(ASN1FILE)
 install:
-		cp -r ../../../asn1c-s1ap $(HOMEASN1DIR)
-		cd $(HOMEASN1DIR) && test -f configure || autoreconf -iv && ./configure && make
+		cd $(ASN1CDIR) && test -f configure || autoreconf -iv && ./configure && make
 clean:
 		rm -f *.go
 
 uninstall:
-		rm -rf $(HOMEASN1DIR)
+		cd $(ASN1CDIR) && $(MAKE) clean
