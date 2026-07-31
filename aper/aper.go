@@ -11,6 +11,7 @@ import (
 	"runtime"
 
 	"github.com/omec-project/ngap/v2/logger"
+	"go.uber.org/zap"
 )
 
 const (
@@ -24,6 +25,9 @@ type perBitData struct {
 }
 
 func perTrace(level int, s string) {
+	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
+		return
+	}
 	logger.AperLog.Debugf("perTrace level is %d", level)
 	_, file, line, ok := runtime.Caller(1)
 	if !ok {
