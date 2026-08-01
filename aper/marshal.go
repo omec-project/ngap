@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+
+	"github.com/omec-project/ngap/v2/logger"
+	"go.uber.org/zap"
 )
 
 type perRawBitData struct {
@@ -16,6 +19,9 @@ type perRawBitData struct {
 }
 
 func perRawBitLog(numBits uint64, byteLen int, bitsOffset uint, value any) string {
+	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
+		return ""
+	}
 	if reflect.TypeOf(value).Kind() == reflect.Uint64 {
 		return fmt.Sprintf("  [PER put %2d bits, byteLen(after): %d, bitsOffset(after): %d, value: 0x%0x]",
 			numBits, byteLen, bitsOffset, reflect.ValueOf(value).Uint())
