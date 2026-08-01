@@ -38,6 +38,9 @@ func perTrace(level int, s string) {
 }
 
 func perBitLog(numBits uint64, byteOffset uint64, bitsOffset uint, value any) string {
+	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
+		return ""
+	}
 	if reflect.TypeOf(value).Kind() == reflect.Uint64 {
 		return fmt.Sprintf("  [PER got %2d bits, byteOffset(after): %d, bitsOffset(after): %d, value: 0x%0x]",
 			numBits, byteOffset, bitsOffset, reflect.ValueOf(value).Uint())
