@@ -24,17 +24,30 @@ type perBitData struct {
 	bitsOffset uint
 }
 
-func perTrace(level int, s string) {
-	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
-		return
-	}
+// perTraceInner logs s with the caller at the given skip depth (0 = perTraceInner).
+func perTraceInner(level int, callerSkip int, s string) {
 	logger.AperLog.Debugf("perTrace level is %d", level)
-	_, file, line, ok := runtime.Caller(1)
+	_, file, line, ok := runtime.Caller(callerSkip)
 	if !ok {
 		logger.AperLog.Debugln(s)
 	} else {
 		logger.AperLog.Debugf("%s (%s:%d)", s, path.Base(file), line)
 	}
+}
+
+func perTrace(level int, s string) {
+	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
+		return
+	}
+	perTraceInner(level, 2, s)
+}
+
+// perTraceFmt skips fmt.Sprintf entirely when debug logging is disabled.
+func perTraceFmt(level int, format string, args ...any) {
+	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
+		return
+	}
+	perTraceInner(level, 2, fmt.Sprintf(format, args...))
 }
 
 func perBitLog(numBits uint64, byteOffset uint64, bitsOffset uint, value any) string {
@@ -123,7 +136,7 @@ func (pd *perBitData) getBitsValue(numBits uint) (value uint64, err error) {
 func (pd *perBitData) parseAlignBits() error {
 	if (pd.bitsOffset & 0x7) > 0 {
 		alignBits := 8 - ((pd.bitsOffset) & 0x7)
-		perTrace(2, fmt.Sprintf("Aligning %d bits", alignBits))
+		perTraceFmt(2, "Aligning %d bits", alignBits)
 		if val, err := pd.getBitsValue(alignBits); err != nil {
 			return err
 		} else if val != 0 {
@@ -136,7 +149,7 @@ func (pd *perBitData) parseAlignBits() error {
 }
 
 func (pd *perBitData) parseConstraintValue(valueRange int64) (value uint64, err error) {
-	perTrace(3, fmt.Sprintf("Getting Constraint Value with range %d", valueRange))
+	perTraceFmt(3, "Getting Constraint Value with range %d", valueRange)
 
 	var bytes uint
 	if valueRange <= 255 {
@@ -253,7 +266,7 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 	if sizeRange == 1 {
 		sizes := uint64(ub+7) >> 3
 		bitString.BitLength = uint64(ub)
-		perTrace(2, fmt.Sprintf("Decoding BIT STRING size %d", ub))
+		perTraceFmt(2, "Decoding BIT STRING size %d", ub)
 		if sizes > 2 {
 			if err := pd.parseAlignBits(); err != nil {
 				return bitString, err
@@ -276,7 +289,7 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 				bitString.Bytes = bytes
 			}
 		}
-		perTrace(2, fmt.Sprintf("Decoded BIT STRING (length = %d): %0.8b", ub, bitString.Bytes))
+		perTraceFmt(2, "Decoded BIT STRING (length = %d): %0.8b", ub, bitString.Bytes)
 		return bitString, nil
 	}
 	repeat := false
@@ -288,7 +301,7 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 			rawLength = length
 		}
 		rawLength += uint64(lb)
-		perTrace(2, fmt.Sprintf("Decoding BIT STRING size %d", rawLength))
+		perTraceFmt(2, "Decoding BIT STRING size %d", rawLength)
 		if rawLength == 0 {
 			return bitString, nil
 		}
@@ -308,7 +321,7 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 			pd.byteOffset--
 		}
 		perTrace(1, perBitLog(rawLength, pd.byteOffset, pd.bitsOffset, bitString.Bytes))
-		perTrace(2, fmt.Sprintf("Decoded BIT STRING (length = %d): %0.8b", rawLength, bitString.Bytes))
+		perTraceFmt(2, "Decoded BIT STRING (length = %d): %0.8b", rawLength, bitString.Bytes)
 
 		if !repeat {
 			// if err = pd.parseAlignBits(); err != nil {
@@ -340,7 +353,7 @@ func (pd *perBitData) parseOctetString(extensed bool, lowerBoundPtr *int64, uppe
 	octetString := OctetString("")
 	// lowerbound == upperbound
 	if sizeRange == 1 {
-		perTrace(2, fmt.Sprintf("Decoding OCTET STRING size %d", ub))
+		perTraceFmt(2, "Decoding OCTET STRING size %d", ub)
 		if ub > 2 {
 			unsignedUB := uint64(ub)
 			if err := pd.parseAlignBits(); err != nil {
@@ -359,7 +372,7 @@ func (pd *perBitData) parseOctetString(extensed bool, lowerBoundPtr *int64, uppe
 				octetString = octet
 			}
 		}
-		perTrace(2, fmt.Sprintf("Decoded OCTET STRING (length = %d): 0x%0x", ub, octetString))
+		perTraceFmt(2, "Decoded OCTET STRING (length = %d): 0x%0x", ub, octetString)
 		return octetString, nil
 	}
 	repeat := false
@@ -371,7 +384,7 @@ func (pd *perBitData) parseOctetString(extensed bool, lowerBoundPtr *int64, uppe
 			rawLength = length
 		}
 		rawLength += uint64(lb)
-		perTrace(2, fmt.Sprintf("Decoding OCTET STRING size %d", rawLength))
+		perTraceFmt(2, "Decoding OCTET STRING size %d", rawLength)
 		if rawLength == 0 {
 			return octetString, nil
 		} else if err := pd.parseAlignBits(); err != nil {
@@ -383,7 +396,7 @@ func (pd *perBitData) parseOctetString(extensed bool, lowerBoundPtr *int64, uppe
 		octetString = append(octetString, pd.bytes[pd.byteOffset:pd.byteOffset+rawLength]...)
 		pd.byteOffset += rawLength
 		perTrace(1, perBitLog(8*rawLength, pd.byteOffset, pd.bitsOffset, octetString))
-		perTrace(2, fmt.Sprintf("Decoded OCTET STRING (length = %d): 0x%0x", rawLength, octetString))
+		perTraceFmt(2, "Decoded OCTET STRING (length = %d): 0x%0x", rawLength, octetString)
 		if !repeat {
 			// if err = pd.parseAlignBits(); err != nil {
 			// 	return
@@ -422,9 +435,9 @@ func (pd *perBitData) parseInteger(extensed bool, lowerBoundPtr *int64, upperBou
 			if upperBoundPtr != nil {
 				ub = *upperBoundPtr
 				valueRange = ub - lb + 1
-				perTrace(3, fmt.Sprintf("Decoding INTEGER with Value Range(%d..%d)", lb, ub))
+				perTraceFmt(3, "Decoding INTEGER with Value Range(%d..%d)", lb, ub)
 			} else {
-				perTrace(3, fmt.Sprintf("Decoding INTEGER with Semi-Constraint Range(%d..)", lb))
+				perTraceFmt(3, "Decoding INTEGER with Semi-Constraint Range(%d..)", lb)
 			}
 		}
 	} else {
@@ -480,7 +493,7 @@ func (pd *perBitData) parseInteger(extensed bool, lowerBoundPtr *int64, upperBou
 			return int64(0), err
 		}
 	}
-	perTrace(2, fmt.Sprintf("Decoding INTEGER Length with %d bytes", rawLength))
+	perTraceFmt(2, "Decoding INTEGER Length with %d bytes", rawLength)
 
 	if rawValue, err := pd.getBitsValue(rawLength * 8); err != nil {
 		return int64(0), err
@@ -511,19 +524,19 @@ func (pd *perBitData) parseEnumerated(extensed bool, lowerBoundPtr *int64, upper
 	}
 
 	if extensed {
-		perTrace(2, fmt.Sprintf("Decoding ENUMERATED with Extensive Value of Range(%d..)", ub+1))
+		perTraceFmt(2, "Decoding ENUMERATED with Extensive Value of Range(%d..)", ub+1)
 		if value, err = pd.parseNormallySmallNonNegativeWholeNumber(); err != nil {
 			return
 		}
 		value += uint64(ub) + 1
 	} else {
-		perTrace(2, fmt.Sprintf("Decoding ENUMERATED with Value Range(%d..%d)", lb, ub))
+		perTraceFmt(2, "Decoding ENUMERATED with Value Range(%d..%d)", lb, ub)
 		valueRange := ub - lb + 1
 		if valueRange > 1 {
 			value, err = pd.parseConstraintValue(valueRange)
 		}
 	}
-	perTrace(2, fmt.Sprintf("Decoded ENUMERATED Value : %d", value))
+	perTraceFmt(2, "Decoded ENUMERATED Value : %d", value)
 	return
 }
 
@@ -539,10 +552,10 @@ func (pd *perBitData) parseSequenceOf(sizeExtensed bool, params fieldParameters,
 	if !sizeExtensed && params.sizeUpperBound != nil && *params.sizeUpperBound < 65536 {
 		ub := *params.sizeUpperBound
 		sizeRange = ub - lb + 1
-		perTrace(3, fmt.Sprintf("Decoding Length of \"SEQUENCE OF\"  with Size Range(%d..%d)", lb, ub))
+		perTraceFmt(3, "Decoding Length of \"SEQUENCE OF\"  with Size Range(%d..%d)", lb, ub)
 	} else {
 		sizeRange = -1
-		perTrace(3, fmt.Sprintf("Decoding Length of \"SEQUENCE OF\" with Semi-Constraint Range(%d..)", lb))
+		perTraceFmt(3, "Decoding Length of \"SEQUENCE OF\" with Semi-Constraint Range(%d..)", lb)
 	}
 
 	var numElements uint64
@@ -566,7 +579,7 @@ func (pd *perBitData) parseSequenceOf(sizeExtensed bool, params fieldParameters,
 		pd.byteOffset++
 		perTrace(1, perBitLog(8, pd.byteOffset, pd.bitsOffset, numElements))
 	}
-	perTrace(2, fmt.Sprintf("Decoding  \"SEQUENCE OF\" struct %s with len(%d)", sliceType.Elem().Name(), numElements))
+	perTraceFmt(2, "Decoding  \"SEQUENCE OF\" struct %s with len(%d)", sliceType.Elem().Name(), numElements)
 	params.sizeExtensible = false
 	params.sizeUpperBound = nil
 	params.sizeLowerBound = nil
@@ -591,7 +604,7 @@ func (pd *perBitData) getChoiceIndex(extensed bool, upperBoundPtr *int64) (prese
 	} else if rawChoice, err1 := pd.parseConstraintValue(ub + 1); err1 != nil {
 		err = err1
 	} else {
-		perTrace(2, fmt.Sprintf("Decoded Present index of CHOICE is %d + 1", rawChoice))
+		perTraceFmt(2, "Decoded Present index of CHOICE is %d + 1", rawChoice)
 		present = int(rawChoice) + 1
 	}
 	return
@@ -650,12 +663,12 @@ func (pd *perBitData) parseOpenType(skip bool, v reflect.Value, params fieldPara
 		}
 	}
 	if skip {
-		perTrace(2, fmt.Sprintf("Skip OpenType (len = %d byte)", len(pdOpenType.bytes)))
+		perTraceFmt(2, "Skip OpenType (len = %d byte)", len(pdOpenType.bytes))
 		return nil
 	} else {
-		perTrace(2, fmt.Sprintf("Decoding OpenType %s with (len = %d byte)", v.Type().String(), len(pdOpenType.bytes)))
+		perTraceFmt(2, "Decoding OpenType %s with (len = %d byte)", v.Type().String(), len(pdOpenType.bytes))
 		err := parseField(v, pdOpenType, params)
-		perTrace(2, fmt.Sprintf("Decoded OpenType %s", v.Type().String()))
+		perTraceFmt(2, "Decoded OpenType %s", v.Type().String())
 		return err
 	}
 }
@@ -683,7 +696,7 @@ func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 		} else if bitsValue != 0 {
 			sizeExtensible = true
 		}
-		perTrace(2, fmt.Sprintf("Decoded Size Extensive Bit : %t", sizeExtensible))
+		perTraceFmt(2, "Decoded Size Extensive Bit : %t", sizeExtensible)
 	}
 	if params.valueExtensible && v.Kind() != reflect.Slice {
 		if bitsValue, err1 := pd.getBitsValue(1); err1 != nil {
@@ -691,7 +704,7 @@ func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 		} else if bitsValue != 0 {
 			valueExtensible = true
 		}
-		perTrace(2, fmt.Sprintf("Decoded Value Extensive Bit : %t", valueExtensible))
+		perTraceFmt(2, "Decoded Value Extensive Bit : %t", valueExtensible)
 	}
 
 	// We deal with the structures defined in this package first.
@@ -735,7 +748,7 @@ func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 			return err
 		} else {
 			val.SetInt(parsedInt)
-			perTrace(2, fmt.Sprintf("Decoded INTEGER Value: %d", parsedInt))
+			perTraceFmt(2, "Decoded INTEGER Value: %d", parsedInt)
 			return nil
 		}
 	case reflect.Struct:
@@ -764,7 +777,7 @@ func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 			} else {
 				optionalPresents = optionalPresentsTmp
 			}
-			perTrace(2, fmt.Sprintf("optionalPresents is %0b", optionalPresents))
+			perTraceFmt(2, "optionalPresents is %0b", optionalPresents)
 		}
 
 		// CHOICE or OpenType
@@ -793,7 +806,7 @@ func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 					return fmt.Errorf("openType Present is bigger than number of struct field")
 				} else {
 					val.Field(0).SetInt(int64(present))
-					perTrace(2, fmt.Sprintf("Decoded Present index of OpenType is %d ", present))
+					perTraceFmt(2, "Decoded Present index of OpenType is %d ", present)
 					return pd.parseOpenType(false, val.Field(present), structParams[present])
 				}
 			} else {
@@ -817,10 +830,10 @@ func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 			if structParams[i].optional && optionalCount > 0 {
 				optionalCount--
 				if optionalPresents&(1<<optionalCount) == 0 {
-					perTrace(3, fmt.Sprintf("Field \"%s\" in %s is OPTIONAL and not present", structType.Field(i).Name, structType))
+					perTraceFmt(3, "Field \"%s\" in %s is OPTIONAL and not present", structType.Field(i).Name, structType)
 					continue
 				} else {
-					perTrace(3, fmt.Sprintf("Field \"%s\" in %s is OPTIONAL and present", structType.Field(i).Name, structType))
+					perTraceFmt(3, "Field \"%s\" in %s is OPTIONAL and present", structType.Field(i).Name, structType)
 				}
 			}
 			// for open type reference
@@ -863,7 +876,7 @@ func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 		} else {
 			printableString := string(octetString)
 			val.SetString(printableString)
-			perTrace(2, fmt.Sprintf("Decoded PrintableString : \"%s\"", printableString))
+			perTraceFmt(2, "Decoded PrintableString : \"%s\"", printableString)
 			return nil
 		}
 	}
