@@ -24,12 +24,10 @@ type perBitData struct {
 	bitsOffset uint
 }
 
-func perTrace(level int, s string) {
-	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
-		return
-	}
+// perTraceInner logs s with the caller at the given skip depth (0 = perTraceInner).
+func perTraceInner(level int, callerSkip int, s string) {
 	logger.AperLog.Debugf("perTrace level is %d", level)
-	_, file, line, ok := runtime.Caller(1)
+	_, file, line, ok := runtime.Caller(callerSkip)
 	if !ok {
 		logger.AperLog.Debugln(s)
 	} else {
@@ -37,12 +35,19 @@ func perTrace(level int, s string) {
 	}
 }
 
+func perTrace(level int, s string) {
+	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
+		return
+	}
+	perTraceInner(level, 2, s)
+}
+
 // perTraceFmt skips fmt.Sprintf entirely when debug logging is disabled.
 func perTraceFmt(level int, format string, args ...any) {
 	if !logger.AperLog.Desugar().Core().Enabled(zap.DebugLevel) {
 		return
 	}
-	perTrace(level, fmt.Sprintf(format, args...))
+	perTraceInner(level, 2, fmt.Sprintf(format, args...))
 }
 
 func perBitLog(numBits uint64, byteOffset uint64, bitsOffset uint, value any) string {
