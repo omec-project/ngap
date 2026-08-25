@@ -10,7 +10,7 @@ From ASN.1 module "NGAP-IEs" found in "38413-i10.asn1"
 package ngapType
 
 type PathSwitchRequestAcknowledgeTransfer struct {
-	ULNGUUPTNLInformation *UPTransportLayerInformation                                          `aper:"valueLB:0,valueUB:1"`
+	ULNGUUPTNLInformation *UPTransportLayerInformation                                          `aper:"valueLB:0,valueUB:1,optional"`
 	SecurityIndication    *SecurityIndication                                                   `aper:"valueExt,optional"`
 	IEExtensions          *ProtocolExtensionContainerPathSwitchRequestAcknowledgeTransferExtIEs `aper:"optional"`
 }

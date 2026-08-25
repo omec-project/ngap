@@ -16,13 +16,13 @@ import (
 type UEAppLayerMeasConfigInfo struct {
 	QoEReference                   QoEReference
 	ServiceType                    ServiceType
-	AreaScopeOfQMC                 *AreaScopeOfQMC `aper:"valueLB:0,valueUB:4"`
+	AreaScopeOfQMC                 *AreaScopeOfQMC `aper:"valueLB:0,valueUB:4,optional"`
 	MeasCollEntityIPAddress        TransportLayerAddress
 	QoEMeasurementStatus           *aper.Enumerated                                          `aper:"optional,valueExt,valueLB:0,valueUB:0"`
 	ContainerForAppLayerMeasConfig aper.OctetString                                          `aper:"optional,sizeLB:1,sizeUB:8000"`
 	MeasConfigAppLayerID           *int64                                                    `aper:"optional,valueExt,valueLB:0,valueUB:15"`
 	SliceSupportListQMC            *SliceSupportListQMC                                      `aper:"optional"`
-	MDTAlignmentInfo               *MDTAlignmentInfo                                         `aper:"valueLB:0,valueUB:1"`
+	MDTAlignmentInfo               *MDTAlignmentInfo                                         `aper:"valueLB:0,valueUB:1,optional"`
 	AvailableRANVisibleQoEMetrics  *AvailableRANVisibleQoEMetrics                            `aper:"valueExt,optional"`
 	IEExtensions                   *ProtocolExtensionContainerUEAppLayerMeasConfigInfoExtIEs `aper:"optional"`
 }

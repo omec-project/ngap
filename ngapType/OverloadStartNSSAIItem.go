@@ -11,7 +11,7 @@ package ngapType
 
 type OverloadStartNSSAIItem struct {
 	SliceOverloadList                   SliceOverloadList
-	SliceOverloadResponse               *OverloadResponse                                       `aper:"valueLB:0,valueUB:1"`
+	SliceOverloadResponse               *OverloadResponse                                       `aper:"valueLB:0,valueUB:1,optional"`
 	SliceTrafficLoadReductionIndication *TrafficLoadReductionIndication                         `aper:"optional"`
 	IEExtensions                        *ProtocolExtensionContainerOverloadStartNSSAIItemExtIEs `aper:"optional"`
 }

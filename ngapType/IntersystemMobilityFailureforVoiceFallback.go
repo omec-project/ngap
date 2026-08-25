@@ -13,6 +13,6 @@ type IntersystemMobilityFailureforVoiceFallback struct {
 	SourcecellID         NGRANCGI                                                                    `aper:"valueLB:0,valueUB:2"`
 	TargetcellID         EUTRACGI                                                                    `aper:"valueExt"`
 	ReconnectCellID      *EUTRACGI                                                                   `aper:"valueExt,optional"`
-	UERLFReportContainer *UERLFReportContainer                                                       `aper:"valueLB:0,valueUB:2"`
+	UERLFReportContainer *UERLFReportContainer                                                       `aper:"valueLB:0,valueUB:2,optional"`
 	IEExtensions         *ProtocolExtensionContainerIntersystemMobilityFailureforVoiceFallbackExtIEs `aper:"optional"`
 }

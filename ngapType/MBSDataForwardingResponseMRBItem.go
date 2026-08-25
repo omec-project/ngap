@@ -12,6 +12,6 @@ package ngapType
 type MBSDataForwardingResponseMRBItem struct {
 	MRBID                        MRBID
 	DLForwardingUPTNLInformation UPTransportLayerInformation                                       `aper:"valueLB:0,valueUB:1"`
-	MRBProgressInformation       *MRBProgressInformation                                           `aper:"valueLB:0,valueUB:2"`
+	MRBProgressInformation       *MRBProgressInformation                                           `aper:"valueLB:0,valueUB:2,optional"`
 	IEExtensions                 *ProtocolExtensionContainerMBSDataForwardingResponseMRBItemExtIEs `aper:"optional"`
 }

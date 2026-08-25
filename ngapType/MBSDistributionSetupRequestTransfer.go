@@ -12,6 +12,6 @@ package ngapType
 type MBSDistributionSetupRequestTransfer struct {
 	MBSSessionID                   MBSSessionID                                                         `aper:"valueExt"`
 	MBSAreaSessionID               *MBSAreaSessionID                                                    `aper:"optional"`
-	SharedNGUUnicastTNLInformation *UPTransportLayerInformation                                         `aper:"valueLB:0,valueUB:1"`
+	SharedNGUUnicastTNLInformation *UPTransportLayerInformation                                         `aper:"valueLB:0,valueUB:1,optional"`
 	IEExtensions                   *ProtocolExtensionContainerMBSDistributionSetupRequestTransferExtIEs `aper:"optional"`
 }

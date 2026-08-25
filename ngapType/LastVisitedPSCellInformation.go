@@ -10,7 +10,7 @@ From ASN.1 module "NGAP-IEs" found in "38413-i10.asn1"
 package ngapType
 
 type LastVisitedPSCellInformation struct {
-	PSCellID     *NGRANCGI                                                     `aper:"valueLB:0,valueUB:2"`
+	PSCellID     *NGRANCGI                                                     `aper:"valueLB:0,valueUB:2,optional"`
 	TimeStay     int64                                                         `aper:"valueLB:0,valueUB:40950"`
 	IEExtensions *ProtocolExtensionContainerLastVisitedPSCellInformationExtIEs `aper:"optional"`
 }
