@@ -18,10 +18,10 @@ type HOReport struct {
 	HandoverCause          Cause                                     `aper:"valueLB:0,valueUB:5"`
 	SourcecellCGI          NGRANCGI                                  `aper:"valueLB:0,valueUB:2"`
 	TargetcellCGI          NGRANCGI                                  `aper:"valueLB:0,valueUB:2"`
-	ReestablishmentcellCGI *NGRANCGI                                 `aper:"valueLB:0,valueUB:2"`
+	ReestablishmentcellCGI *NGRANCGI                                 `aper:"valueLB:0,valueUB:2,optional"`
 	SourcecellCRNTI        *aper.BitString                           `aper:"optional,sizeLB:16,sizeUB:16"`
 	TargetcellinEUTRAN     *EUTRACGI                                 `aper:"valueExt,optional"`
 	MobilityInformation    *MobilityInformation                      `aper:"optional"`
-	UERLFReportContainer   *UERLFReportContainer                     `aper:"valueLB:0,valueUB:2"`
+	UERLFReportContainer   *UERLFReportContainer                     `aper:"valueLB:0,valueUB:2,optional"`
 	IEExtensions           *ProtocolExtensionContainerHOReportExtIEs `aper:"optional"`
 }

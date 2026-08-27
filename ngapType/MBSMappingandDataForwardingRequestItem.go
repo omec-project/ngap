@@ -12,6 +12,6 @@ package ngapType
 type MBSMappingandDataForwardingRequestItem struct {
 	MRBID                  MRBID
 	MBSQoSFlowList         MBSQoSFlowList
-	MRBProgressInformation *MRBProgressInformation                                                 `aper:"valueLB:0,valueUB:2"`
+	MRBProgressInformation *MRBProgressInformation                                                 `aper:"valueLB:0,valueUB:2,optional"`
 	IEExtensions           *ProtocolExtensionContainerMBSMappingandDataForwardingRequestItemExtIEs `aper:"optional"`
 }

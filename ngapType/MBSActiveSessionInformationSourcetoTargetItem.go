@@ -12,7 +12,7 @@ package ngapType
 type MBSActiveSessionInformationSourcetoTargetItem struct {
 	MBSSessionID                           MBSSessionID      `aper:"valueExt"`
 	MBSAreaSessionID                       *MBSAreaSessionID `aper:"optional"`
-	MBSServiceArea                         *MBSServiceArea   `aper:"valueLB:0,valueUB:2"`
+	MBSServiceArea                         *MBSServiceArea   `aper:"valueLB:0,valueUB:2,optional"`
 	MBSQoSFlowsToBeSetupList               MBSQoSFlowsToBeSetupList
 	MBSMappingandDataForwardingRequestList *MBSMappingandDataForwardingRequestList                                        `aper:"optional"`
 	IEExtensions                           *ProtocolExtensionContainerMBSActiveSessionInformationSourcetoTargetItemExtIEs `aper:"optional"`

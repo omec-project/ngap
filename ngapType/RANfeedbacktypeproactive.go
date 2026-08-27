@@ -11,6 +11,6 @@ package ngapType
 
 type RANfeedbacktypeProactive struct {
 	BurstArrivalTimeWindow BurstArrivalTimeWindow                                    `aper:"valueExt"`
-	PeriodicityRange       *PeriodicityRange                                         `aper:"valueLB:0,valueUB:2"`
+	PeriodicityRange       *PeriodicityRange                                         `aper:"valueLB:0,valueUB:2,optional"`
 	IEExtension            *ProtocolExtensionContainerRANfeedbacktypeProactiveExtIEs `aper:"optional"`
 }

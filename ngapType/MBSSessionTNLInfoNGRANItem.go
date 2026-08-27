@@ -11,6 +11,6 @@ package ngapType
 
 type MBSSessionTNLInfoNGRANItem struct {
 	MBSAreaSessionID               MBSAreaSessionID
-	SharedNGUUnicastTNLInformation *UPTransportLayerInformation                                `aper:"valueLB:0,valueUB:1"`
+	SharedNGUUnicastTNLInformation *UPTransportLayerInformation                                `aper:"valueLB:0,valueUB:1,optional"`
 	IEExtensions                   *ProtocolExtensionContainerMBSSessionTNLInfoNGRANItemExtIEs `aper:"optional"`
 }

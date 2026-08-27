@@ -10,8 +10,8 @@ From ASN.1 module "NGAP-IEs" found in "38413-i10.asn1"
 package ngapType
 
 type PDUSessionResourceModifyResponseTransfer struct {
-	DLNGUUPTNLInformation                *UPTransportLayerInformation                                              `aper:"valueLB:0,valueUB:1"`
-	ULNGUUPTNLInformation                *UPTransportLayerInformation                                              `aper:"valueLB:0,valueUB:1"`
+	DLNGUUPTNLInformation                *UPTransportLayerInformation                                              `aper:"valueLB:0,valueUB:1,optional"`
+	ULNGUUPTNLInformation                *UPTransportLayerInformation                                              `aper:"valueLB:0,valueUB:1,optional"`
 	QosFlowAddOrModifyResponseList       *QosFlowAddOrModifyResponseList                                           `aper:"optional"`
 	AdditionalDLQosFlowPerTNLInformation *QosFlowPerTNLInformationList                                             `aper:"optional"`
 	QosFlowFailedToAddOrModifyList       *QosFlowListWithCause                                                     `aper:"optional"`

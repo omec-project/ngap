@@ -15,6 +15,6 @@ type MBSDistributionSetupResponseTransfer struct {
 	SharedNGUMulticastTNLInformation *SharedNGUMulticastTNLInformation `aper:"valueExt,optional"`
 	MBSQoSFlowsToBeSetupList         MBSQoSFlowsToBeSetupList
 	MBSSessionStatus                 MBSSessionStatus
-	MBSServiceArea                   *MBSServiceArea                                                       `aper:"valueLB:0,valueUB:2"`
+	MBSServiceArea                   *MBSServiceArea                                                       `aper:"valueLB:0,valueUB:2,optional"`
 	IEExtensions                     *ProtocolExtensionContainerMBSDistributionSetupResponseTransferExtIEs `aper:"optional"`
 }

@@ -11,6 +11,6 @@ package ngapType
 
 type NGRANTNLAssociationToRemoveItem struct {
 	TNLAssociationTransportLayerAddress    CPTransportLayerInformation                                      `aper:"valueLB:0,valueUB:1"`
-	TNLAssociationTransportLayerAddressAMF *CPTransportLayerInformation                                     `aper:"valueLB:0,valueUB:1"`
+	TNLAssociationTransportLayerAddressAMF *CPTransportLayerInformation                                     `aper:"valueLB:0,valueUB:1,optional"`
 	IEExtensions                           *ProtocolExtensionContainerNGRANTNLAssociationToRemoveItemExtIEs `aper:"optional"`
 }

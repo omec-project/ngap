@@ -14,6 +14,6 @@ type LastVisitedNGRANCellInformation struct {
 	CellType                              CellType `aper:"valueExt"`
 	TimeUEStayedInCell                    TimeUEStayedInCell
 	TimeUEStayedInCellEnhancedGranularity *TimeUEStayedInCellEnhancedGranularity                           `aper:"optional"`
-	HOCauseValue                          *Cause                                                           `aper:"valueLB:0,valueUB:5"`
+	HOCauseValue                          *Cause                                                           `aper:"valueLB:0,valueUB:5,optional"`
 	IEExtensions                          *ProtocolExtensionContainerLastVisitedNGRANCellInformationExtIEs `aper:"optional"`
 }

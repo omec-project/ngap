@@ -12,6 +12,6 @@ package ngapType
 type TooearlyIntersystemHO struct {
 	SourcecellID         EUTRACGI                                               `aper:"valueExt"`
 	FailurecellID        NGRANCGI                                               `aper:"valueLB:0,valueUB:2"`
-	UERLFReportContainer *UERLFReportContainer                                  `aper:"valueLB:0,valueUB:2"`
+	UERLFReportContainer *UERLFReportContainer                                  `aper:"valueLB:0,valueUB:2,optional"`
 	IEExtensions         *ProtocolExtensionContainerTooearlyIntersystemHOExtIEs `aper:"optional"`
 }

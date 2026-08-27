@@ -18,7 +18,7 @@ type RANTimingSynchronisationStatusInfo struct {
 	TraceabletoUTC          *aper.Enumerated                                                    `aper:"optional,valueExt,valueLB:0,valueUB:1"`
 	TraceabletoGNSS         *aper.Enumerated                                                    `aper:"optional,valueExt,valueLB:0,valueUB:1"`
 	ClockFrequencyStability *aper.BitString                                                     `aper:"optional,sizeLB:16,sizeUB:16"`
-	ClockAccuracy           *ClockAccuracy                                                      `aper:"valueLB:0,valueUB:2"`
+	ClockAccuracy           *ClockAccuracy                                                      `aper:"valueLB:0,valueUB:2,optional"`
 	ParentTImeSource        *ParentTImeSource                                                   `aper:"optional"`
 	IEExtensions            *ProtocolExtensionContainerRANTimingSynchronisationStatusInfoExtIEs `aper:"optional"`
 }
