@@ -20,7 +20,7 @@ linters:
     - govet
     - goconst
     - godox
-    - gomodguard
+    - gomodguard_v2
     - misspell
     - nakedret
     - noctx
