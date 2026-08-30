@@ -647,7 +647,7 @@ func (pd *perRawBitData) makeField(v reflect.Value, params fieldParameters) erro
 	if v.Kind() == reflect.Interface && v.Type().NumMethod() == 0 {
 		return pd.makeField(v.Elem(), params)
 	}
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		return pd.makeField(v.Elem(), params)
 	}
 	fieldType := v.Type()
@@ -704,7 +704,7 @@ func (pd *perRawBitData) makeField(v reflect.Value, params fieldParameters) erro
 					if !v.Field(i).IsNil() {
 						optionalPresents++
 					}
-				} else if v.Field(i).Type().Kind() == reflect.Ptr && v.Field(i).IsNil() {
+				} else if v.Field(i).Type().Kind() == reflect.Pointer && v.Field(i).IsNil() {
 					return fmt.Errorf("nil element in SEQUENCE type")
 				}
 			}
