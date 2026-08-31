@@ -74,7 +74,7 @@ func GetBitString(srcBytes []byte, bitsOffset uint, numBits uint) (dstBytes []by
 	dstBytes = make([]byte, numBitsByteLen)
 	numBitsMask := byte(0xff)
 	if modEight := numBits & 0x7; modEight != 0 {
-		numBitsMask <<= uint8(8 - (modEight))
+		numBitsMask <<= uint8(8 - modEight)
 	}
 	for i := 1; i < int(byteLen); i++ {
 		dstBytes[i-1] = srcBytes[i-1]<<bitsOffset | srcBytes[i]>>(8-bitsOffset)
@@ -135,7 +135,7 @@ func (pd *perBitData) getBitsValue(numBits uint) (value uint64, err error) {
 
 func (pd *perBitData) parseAlignBits() error {
 	if (pd.bitsOffset & 0x7) > 0 {
-		alignBits := 8 - ((pd.bitsOffset) & 0x7)
+		alignBits := 8 - (pd.bitsOffset & 0x7)
 		perTraceFmt(2, "Aligning %d bits", alignBits)
 		if val, err := pd.getBitsValue(alignBits); err != nil {
 			return err
