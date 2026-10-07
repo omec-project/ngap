@@ -274,11 +274,16 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 			if (pd.byteOffset + sizes) > uint64(len(pd.bytes)) {
 				return bitString, fmt.Errorf("per data out of range")
 			}
-			bitString.Bytes = pd.bytes[pd.byteOffset : pd.byteOffset+sizes]
+			// Copy out of pd.bytes so the returned BitString does not alias the
+			// input buffer, which the caller would otherwise be able to mutate.
+			bitString.Bytes = append([]byte(nil), pd.bytes[pd.byteOffset:pd.byteOffset+sizes]...)
 			pd.byteOffset += sizes
 			pd.bitsOffset = uint(ub & 0x7)
 			if pd.bitsOffset > 0 {
 				pd.byteOffset--
+				// Mask the unused trailing bits of the final byte; they hold the
+				// leading bits of the following field in the shared pd.bytes.
+				bitString.Bytes[sizes-1] &= byte(0xff) << (8 - pd.bitsOffset)
 			}
 			perTrace(1, perBitLog(uint64(ub), pd.byteOffset, pd.bitsOffset, bitString.Bytes))
 		} else {
@@ -329,6 +334,13 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 			// }
 			break
 		}
+	}
+	// Mask the unused trailing bits of the final byte. The appended bytes are
+	// copied from pd.bytes, so the last byte may still hold the leading bits of
+	// the following field. Clearing them keeps the decoded value independent of
+	// what follows, matching GetBitString (fixed-size path) and appendBitString.
+	if modEight := bitString.BitLength & 0x7; modEight != 0 && len(bitString.Bytes) > 0 {
+		bitString.Bytes[len(bitString.Bytes)-1] &= byte(0xff) << uint(8-modEight)
 	}
 	return bitString, nil
 }
