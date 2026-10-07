@@ -980,7 +980,6 @@ func TestSingleBoolean(t *testing.T) {
 	}
 }
 
-/** FIXME
 type optionalTest1 struct {
 	OctetString1 *OctetString `aper:"sizeExt,sizeLB:1,sizeUB:16,optional"`
 	BitString2   BitString    `aper:"sizeLB:2,sizeUB:5"`
@@ -988,7 +987,9 @@ type optionalTest1 struct {
 }
 
 var optionalTest1Data = []optionalTest1{
-	{&oCTETStringTest1Data[1].OctetString, BitString{[]byte{0x50}, 4}, 19},
+	// BitString2's trailing 4 bits are not padding: they are the leading bits of the
+	// following Int3 field packed into the same byte, so the raw byte is 0x59, not 0x50.
+	{&oCTETStringTest1Data[1].OctetString, BitString{[]byte{0x59}, 4}, 19},
 }
 var optionalTestData = []testData{
 	{[]byte("\x8C\x23\x34\x52\x97\x80\x59\x80"), optionalTest1Data[0]},
@@ -1004,7 +1005,7 @@ func TestOptional(t *testing.T) {
 		for j := 0; j < reflect.TypeOf(out.Elem().Interface()).NumField(); j++ {
 			exp := reflect.ValueOf(test.Out).Field(j)
 			v := out.Elem().Field(j)
-			if v.Kind() == reflect.Ptr {
+			if v.Kind() == reflect.Pointer {
 				v = v.Elem()
 				exp = exp.Elem()
 			}
@@ -1022,4 +1023,3 @@ func TestOptional(t *testing.T) {
 		t.Errorf("TEST %d is FAILED", i+1)
 	}
 }
-*/
