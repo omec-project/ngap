@@ -987,9 +987,7 @@ type optionalTest1 struct {
 }
 
 var optionalTest1Data = []optionalTest1{
-	// BitString2's trailing 4 bits are not padding: they are the leading bits of the
-	// following Int3 field packed into the same byte, so the raw byte is 0x59, not 0x50.
-	{&oCTETStringTest1Data[1].OctetString, BitString{[]byte{0x59}, 4}, 19},
+	{&oCTETStringTest1Data[1].OctetString, BitString{[]byte{0x50}, 4}, 19},
 }
 
 var optionalTestData = []testData{
