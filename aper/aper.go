@@ -305,7 +305,9 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 		} else {
 			rawLength = length
 		}
-		rawLength += uint64(lb)
+		if sizeRange > 0 {
+			rawLength += uint64(lb)
+		}
 		perTraceFmt(2, "Decoding BIT STRING size %d", rawLength)
 		if rawLength == 0 {
 			return bitString, nil
@@ -395,7 +397,9 @@ func (pd *perBitData) parseOctetString(extensed bool, lowerBoundPtr *int64, uppe
 		} else {
 			rawLength = length
 		}
-		rawLength += uint64(lb)
+		if sizeRange > 0 {
+			rawLength += uint64(lb)
+		}
 		perTraceFmt(2, "Decoding OCTET STRING size %d", rawLength)
 		if rawLength == 0 {
 			return octetString, nil
@@ -570,31 +574,43 @@ func (pd *perBitData) parseSequenceOf(sizeExtensed bool, params fieldParameters,
 		perTraceFmt(3, "Decoding Length of \"SEQUENCE OF\" with Semi-Constraint Range(%d..)", lb)
 	}
 
-	var numElements uint64
-	if sizeRange > 1 {
-		if numElementsTmp, err := pd.parseConstraintValue(sizeRange); err != nil {
-			logger.AperLog.Warnf("Parse Constraint Value failed: %+v", err)
-		} else {
-			numElements = numElementsTmp
-		}
-		numElements += uint64(lb)
-	} else if sizeRange == 1 {
-		numElements += uint64(lb)
-	} else {
-		if err := pd.parseAlignBits(); err != nil {
-			return sliceContent, err
-		}
-		if pd.byteOffset >= uint64(len(pd.bytes)) {
-			return sliceContent, fmt.Errorf("per data out of range")
-		}
-		numElements = uint64(pd.bytes[pd.byteOffset])
-		pd.byteOffset++
-		perTrace(1, perBitLog(8, pd.byteOffset, pd.bitsOffset, numElements))
-	}
-	perTraceFmt(2, "Decoding  \"SEQUENCE OF\" struct %s with len(%d)", sliceType.Elem().Name(), numElements)
 	params.sizeExtensible = false
 	params.sizeUpperBound = nil
 	params.sizeLowerBound = nil
+	elemType := sliceType.Elem()
+
+	if sizeRange <= 0 {
+		// X.691 #11.9.3.8: the count is a general length determinant, possibly
+		// fragmented. Grow the slice per element so that memory is bounded by the
+		// data actually present instead of the declared count.
+		sliceContent = reflect.MakeSlice(sliceType, 0, 0)
+		for repeat := true; repeat; {
+			numElements, err := pd.parseLength(-1, &repeat)
+			if err != nil {
+				return sliceContent, err
+			}
+			perTraceFmt(2, "Decoding  \"SEQUENCE OF\" struct %s with len(%d)", elemType.Name(), numElements)
+			for j := uint64(0); j < numElements; j++ {
+				elem := reflect.New(elemType).Elem()
+				if err := parseField(elem, pd, params); err != nil {
+					return sliceContent, err
+				}
+				sliceContent = reflect.Append(sliceContent, elem)
+			}
+		}
+		return sliceContent, nil
+	}
+
+	var numElements uint64
+	if sizeRange > 1 {
+		numElementsTmp, err := pd.parseConstraintValue(sizeRange)
+		if err != nil {
+			return sliceContent, err
+		}
+		numElements = numElementsTmp
+	}
+	numElements += uint64(lb)
+	perTraceFmt(2, "Decoding  \"SEQUENCE OF\" struct %s with len(%d)", elemType.Name(), numElements)
 	intNumElements := int(numElements)
 	sliceContent = reflect.MakeSlice(sliceType, intNumElements, intNumElements)
 	for i := 0; i < intNumElements; i++ {

@@ -221,6 +221,10 @@ func (pd *perRawBitData) appendBitString(bytes []byte, bitsLength uint64, extens
 	if ub > 65535 {
 		sizeRange = -1
 	}
+	if sizeRange <= 0 {
+		// The length determinant is not offset by the lower bound (X.691 #11.9.4.2).
+		lb = 0
+	}
 	sizes := (bitsLength + 7) >> 3
 	shift := (8 - bitsLength&0x7)
 	if shift != 8 {
@@ -312,6 +316,10 @@ func (pd *perRawBitData) appendOctetString(bytes []byte, extensive bool, lowerBo
 
 	if ub > 65535 {
 		sizeRange = -1
+	}
+	if sizeRange <= 0 {
+		// The length determinant is not offset by the lower bound (X.691 #11.9.4.2).
+		lb = 0
 	}
 
 	if sizeRange == 1 {
@@ -431,7 +439,9 @@ func (pd *perRawBitData) appendInteger(value int64, extensive bool, lowerBoundPt
 	} else if valueRange <= 65536 {
 		return pd.appendConstraintValue(valueRange, uint64(value-lb))
 	} else {
-		unsignedValue >>= 8
+		// Constrained whole number: the offset from the lower bound is encoded
+		// in the minimum number of octets (X.691 #11.5.7.4).
+		unsignedValue = uint64(value-lb) >> 8
 	}
 	for rawLength = 1; rawLength <= 127; rawLength++ {
 		if unsignedValue == 0 {
@@ -453,7 +463,7 @@ func (pd *perRawBitData) appendInteger(value int64, extensive bool, lowerBoundPt
 		unsignedValueRange := uint64(valueRange - 1)
 		for byteLen = 1; byteLen <= 127; byteLen++ {
 			unsignedValueRange >>= 8
-			if unsignedValueRange <= 1 {
+			if unsignedValueRange == 0 {
 				break
 			}
 		}
@@ -561,14 +571,37 @@ func (pd *perRawBitData) parseSequenceOf(v reflect.Value, params fieldParameters
 		}
 	} else {
 		perTraceFmt(3, "Encoding Length(%d) of \"SEQUENCE OF\" with Semi-Constraint Range(%d..)", numElements, lb)
-		pd.appendAlignBits()
-		pd.bytes = append(pd.bytes, byte(numElements&0xff))
-		perTrace(1, perRawBitLog(8, len(pd.bytes), pd.bitsOffset, uint64(numElements)))
 	}
 	perTraceFmt(2, "Encoding  \"SEQUENCE OF\" struct %s with len(%d)", v.Type().Elem().Name(), numElements)
 	params.sizeExtensible = false
 	params.sizeUpperBound = nil
 	params.sizeLowerBound = nil
+
+	if sizeRange <= 0 {
+		// X.691 #11.9.3.8: the count is a general length determinant. Counts of
+		// 16K or more are sent as fragments of 16K*m components, followed by a
+		// final (possibly zero) length.
+		for i := 0; ; {
+			remaining := v.Len() - i
+			part := remaining
+			if remaining >= 65536 {
+				part = 65536
+			} else if remaining >= 16384 {
+				part = remaining &^ 16383
+			}
+			if err := pd.appendLength(-1, uint64(part)); err != nil {
+				return err
+			}
+			for end := i + part; i < end; i++ {
+				if err := pd.makeField(v.Index(i), params); err != nil {
+					return err
+				}
+			}
+			if part < 16384 {
+				return nil
+			}
+		}
+	}
 	for i := 0; i < v.Len(); i++ {
 		if err := pd.makeField(v.Index(i), params); err != nil {
 			return err
