@@ -188,6 +188,18 @@ func (pd *perRawBitData) appendLength(sizeRange int64, value uint64) (err error)
 	return
 }
 
+// fragmentLength returns the size of the next fragment when n units are sent with a general
+// length determinant (X.691 #11.9.3.8.1): 16K*m units for m = 1..4, or n if n < 16K.
+func fragmentLength(n uint64) uint64 {
+	switch {
+	case n >= 65536:
+		return 65536
+	case n >= 16384:
+		return n &^ 16383
+	}
+	return n
+}
+
 func (pd *perRawBitData) appendBitString(bytes []byte, bitsLength uint64, extensive bool,
 	lowerBoundPtr *int64, upperBoundPtr *int64,
 ) error {
@@ -197,10 +209,10 @@ func (pd *perRawBitData) appendBitString(bytes []byte, bitsLength uint64, extens
 		lb = *lowerBoundPtr
 		if upperBoundPtr != nil {
 			ub = *upperBoundPtr
-			if bitsLength <= uint64(ub) {
+			if bitsLength >= uint64(lb) && bitsLength <= uint64(ub) {
 				sizeRange = ub - lb + 1
 			} else if !extensive {
-				return fmt.Errorf("bitString Length is over upperbound")
+				return fmt.Errorf("bitString Length(%d) is outside the size constraint (%d..%d)", bitsLength, lb, ub)
 			}
 			if extensive {
 				perTrace(2, "Putting size Extension Value")
@@ -215,6 +227,8 @@ func (pd *perRawBitData) appendBitString(bytes []byte, bitsLength uint64, extens
 					}
 				}
 			}
+		} else if bitsLength < uint64(lb) {
+			return fmt.Errorf("bitString Length(%d) is below the lower bound %d", bitsLength, lb)
 		}
 	}
 
@@ -222,7 +236,8 @@ func (pd *perRawBitData) appendBitString(bytes []byte, bitsLength uint64, extens
 		sizeRange = -1
 	}
 	if sizeRange <= 0 {
-		// The length determinant is not offset by the lower bound (X.691 #11.9.4.2).
+		// The length determinant is not offset by the lower bound (X.691 #11.9.4.2);
+		// the lower bound was validated above.
 		lb = 0
 	}
 	sizes := (bitsLength + 7) >> 3
@@ -251,12 +266,10 @@ func (pd *perRawBitData) appendBitString(bytes []byte, bitsLength uint64, extens
 
 	var byteOffset, partOfRawLength uint64
 	for {
-		if rawLength > 65536 {
-			partOfRawLength = 65536
-		} else if rawLength >= 16384 {
-			partOfRawLength = rawLength & 0xc000
-		} else {
-			partOfRawLength = rawLength
+		// Only a general length determinant (unconstrained size) is fragmented.
+		partOfRawLength = rawLength
+		if sizeRange <= 0 {
+			partOfRawLength = fragmentLength(rawLength)
 		}
 		if err = pd.appendLength(sizeRange, partOfRawLength); err != nil {
 			return err
@@ -273,11 +286,10 @@ func (pd *perRawBitData) appendBitString(bytes []byte, bitsLength uint64, extens
 		perTraceFmt(2, "Encoded BIT STRING (length = %d): 0x%0x", partOfRawLength,
 			bytes[byteOffset:byteOffset+sizes])
 		rawLength -= (partOfRawLength - uint64(lb))
-		if rawLength > 0 {
-			byteOffset += sizes
-		} else {
+		byteOffset += sizes
+		if sizeRange > 0 || partOfRawLength < 16384 {
 			pd.bitsOffset += uint(partOfRawLength & 0x7)
-			// pd.appendAlignBits()
+			// A full fragment is followed by another determinant, possibly zero (X.691 #11.9.3.8.3).
 			break
 		}
 	}
@@ -293,10 +305,10 @@ func (pd *perRawBitData) appendOctetString(bytes []byte, extensive bool, lowerBo
 		lb = *lowerBoundPtr
 		if upperBoundPtr != nil {
 			ub = *upperBoundPtr
-			if byteLen <= uint64(ub) {
+			if byteLen >= uint64(lb) && byteLen <= uint64(ub) {
 				sizeRange = ub - lb + 1
 			} else if !extensive {
-				return fmt.Errorf("octetString Length is over upperbound")
+				return fmt.Errorf("octetString Length(%d) is outside the size constraint (%d..%d)", byteLen, lb, ub)
 			}
 			if extensive {
 				perTrace(2, "Putting size Extension Value")
@@ -311,6 +323,8 @@ func (pd *perRawBitData) appendOctetString(bytes []byte, extensive bool, lowerBo
 					}
 				}
 			}
+		} else if byteLen < uint64(lb) {
+			return fmt.Errorf("octetString Length(%d) is below the lower bound %d", byteLen, lb)
 		}
 	}
 
@@ -318,7 +332,8 @@ func (pd *perRawBitData) appendOctetString(bytes []byte, extensive bool, lowerBo
 		sizeRange = -1
 	}
 	if sizeRange <= 0 {
-		// The length determinant is not offset by the lower bound (X.691 #11.9.4.2).
+		// The length determinant is not offset by the lower bound (X.691 #11.9.4.2);
+		// the lower bound was validated above.
 		lb = 0
 	}
 
@@ -342,12 +357,10 @@ func (pd *perRawBitData) appendOctetString(bytes []byte, extensive bool, lowerBo
 
 	var byteOffset, partOfRawLength uint64
 	for {
-		if rawLength > 65536 {
-			partOfRawLength = 65536
-		} else if rawLength >= 16384 {
-			partOfRawLength = rawLength & 0xc000
-		} else {
-			partOfRawLength = rawLength
+		// Only a general length determinant (unconstrained size) is fragmented.
+		partOfRawLength = rawLength
+		if sizeRange <= 0 {
+			partOfRawLength = fragmentLength(rawLength)
 		}
 		if err := pd.appendLength(sizeRange, partOfRawLength); err != nil {
 			return err
@@ -363,10 +376,9 @@ func (pd *perRawBitData) appendOctetString(bytes []byte, extensive bool, lowerBo
 		perTraceFmt(2, "Encoded OCTET STRING (length = %d): 0x%0x", partOfRawLength,
 			bytes[byteOffset:byteOffset+partOfRawLength])
 		rawLength -= (partOfRawLength - uint64(lb))
-		if rawLength > 0 {
-			byteOffset += partOfRawLength
-		} else {
-			// pd.appendAlignBits()
+		byteOffset += partOfRawLength
+		if sizeRange > 0 || partOfRawLength < 16384 {
+			// A full fragment is followed by another determinant, possibly zero (X.691 #11.9.3.8.3).
 			break
 		}
 	}
@@ -532,34 +544,39 @@ func (pd *perRawBitData) appendEnumerated(value uint64, extensive bool, lowerBou
 func (pd *perRawBitData) parseSequenceOf(v reflect.Value, params fieldParameters) error {
 	var lb, ub, sizeRange int64 = 0, -1, -1
 	numElements := int64(v.Len())
-	if params.sizeLowerBound != nil && *params.sizeLowerBound < 65536 {
-		lb = *params.sizeLowerBound
+
+	// Root membership uses the declared bounds, whatever their magnitude.
+	inRoot := params.sizeLowerBound == nil || numElements >= *params.sizeLowerBound
+
+	if params.sizeUpperBound != nil && numElements > *params.sizeUpperBound {
+		inRoot = false
 	}
-	if params.sizeUpperBound != nil && *params.sizeUpperBound < 65536 {
-		ub = *params.sizeUpperBound
-		if params.sizeExtensible {
-			if numElements > ub {
-				if err := pd.putBitsValue(1, 1); err != nil {
-					return err
-				}
-			} else {
-				if err := pd.putBitsValue(0, 1); err != nil {
-					return err
-				}
-				sizeRange = ub - lb + 1
-			}
-		} else if numElements > ub {
-			return fmt.Errorf("sequence of size is larger than upperbound")
-		} else {
-			sizeRange = ub - lb + 1
+	if params.sizeExtensible {
+		var extBit uint64
+		if !inRoot {
+			extBit = 1
 		}
-	} else {
-		sizeRange = -1
+		if err := pd.putBitsValue(extBit, 1); err != nil {
+			return err
+		}
+	} else if !inRoot {
+		if params.sizeUpperBound != nil && numElements > *params.sizeUpperBound {
+			return fmt.Errorf("sequence of size is larger than upperbound")
+		}
+		return fmt.Errorf("sequence of size is lower than lowerbound")
 	}
 
-	if numElements < lb {
-		return fmt.Errorf("sequence of size is lower than lowerbound")
-	} else if sizeRange == 1 {
+	// Only a root value with an upper bound below 64K has a constrained count (X.691 #11.9.4.1);
+	// anything else uses a general length determinant that is not offset by the lower bound.
+	if inRoot && params.sizeUpperBound != nil && *params.sizeUpperBound < 65536 {
+		ub = *params.sizeUpperBound
+		if params.sizeLowerBound != nil {
+			lb = *params.sizeLowerBound
+		}
+		sizeRange = ub - lb + 1
+	}
+
+	if sizeRange == 1 {
 		perTraceFmt(3, "Encoding Length of \"SEQUENCE OF\"  with fix-size %d", ub)
 		if numElements != ub {
 			return fmt.Errorf("encoding length %d != fix-size %d", numElements, ub)
@@ -570,7 +587,7 @@ func (pd *perRawBitData) parseSequenceOf(v reflect.Value, params fieldParameters
 			return err
 		}
 	} else {
-		perTraceFmt(3, "Encoding Length(%d) of \"SEQUENCE OF\" with Semi-Constraint Range(%d..)", numElements, lb)
+		perTraceFmt(3, "Encoding Length(%d) of \"SEQUENCE OF\" with a general length determinant", numElements)
 	}
 	perTraceFmt(2, "Encoding  \"SEQUENCE OF\" struct %s with len(%d)", v.Type().Elem().Name(), numElements)
 	params.sizeExtensible = false
@@ -583,12 +600,7 @@ func (pd *perRawBitData) parseSequenceOf(v reflect.Value, params fieldParameters
 		// final (possibly zero) length.
 		for i := 0; ; {
 			remaining := v.Len() - i
-			part := remaining
-			if remaining >= 65536 {
-				part = 65536
-			} else if remaining >= 16384 {
-				part = remaining &^ 16383
-			}
+			part := int(fragmentLength(uint64(remaining)))
 			if err := pd.appendLength(-1, uint64(part)); err != nil {
 				return err
 			}
@@ -633,6 +645,10 @@ func (pd *perRawBitData) appendOpenType(v reflect.Value, params fieldParameters)
 	if err := pdOpenType.makeField(v, params); err != nil {
 		return err
 	}
+	if len(pdOpenType.bytes) == 0 {
+		// A complete encoding of a zero-bit value is one zero octet (X.691 #10.1.3).
+		pdOpenType.bytes = []byte{0x00}
+	}
 	openTypeBytes := pdOpenType.bytes
 	rawLength := uint64(len(pdOpenType.bytes))
 	perTraceFmt(2, "Encoding OpenType %s RawData : 0x%0x(%d bytes)", v.Type().String(), pdOpenType.bytes,
@@ -640,13 +656,7 @@ func (pd *perRawBitData) appendOpenType(v reflect.Value, params fieldParameters)
 
 	var byteOffset, partOfRawLength uint64
 	for {
-		if rawLength > 65536 {
-			partOfRawLength = 65536
-		} else if rawLength >= 16384 {
-			partOfRawLength = rawLength & 0xc000
-		} else {
-			partOfRawLength = rawLength
-		}
+		partOfRawLength = fragmentLength(rawLength)
 		if err := pd.appendLength(-1, partOfRawLength); err != nil {
 			return err
 		}
@@ -660,9 +670,9 @@ func (pd *perRawBitData) appendOpenType(v reflect.Value, params fieldParameters)
 		perTraceFmt(2, "Encoded OpenType RawData (length = %d): 0x%0x", partOfRawLength,
 			openTypeBytes[byteOffset:byteOffset+partOfRawLength])
 		rawLength -= partOfRawLength
-		if rawLength > 0 {
-			byteOffset += partOfRawLength
-		} else {
+		byteOffset += partOfRawLength
+		if partOfRawLength < 16384 {
+			// A full fragment is followed by another determinant, possibly zero.
 			pd.appendAlignBits()
 			break
 		}

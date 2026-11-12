@@ -5,6 +5,7 @@ package ngap_test
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 
 	"github.com/omec-project/ngap/v2/aper"
@@ -54,6 +55,9 @@ func TestExtensibleIntegerRootRange(t *testing.T) {
 		}
 		if err := aper.Unmarshal(tc.want, tc.out); err != nil {
 			t.Fatalf("%s: unmarshal: %v", tc.name, err)
+		}
+		if decoded := reflect.ValueOf(tc.out).Elem().Interface(); !reflect.DeepEqual(decoded, tc.in) {
+			t.Errorf("%s: unmarshal = %+v, want %+v", tc.name, decoded, tc.in)
 		}
 	}
 }

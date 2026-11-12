@@ -16,6 +16,10 @@ import (
 
 const (
 	PRESENT = "Present"
+
+	// maxUnboundedSequenceOf bounds the components accepted for a SEQUENCE OF that has no
+	// declared upper bound, or whose size extension bit is set.
+	maxUnboundedSequenceOf = 1 << 20
 )
 
 type perBitData struct {
@@ -64,6 +68,9 @@ func perBitLog(numBits uint64, byteOffset uint64, bitsOffset uint, value any) st
 
 // GetBitString is to get BitString with desire size from source byte array with bit offset
 func GetBitString(srcBytes []byte, bitsOffset uint, numBits uint) (dstBytes []byte, err error) {
+	if numBits == 0 {
+		return []byte{}, nil
+	}
 	bitsLeft := uint(len(srcBytes))*8 - bitsOffset
 	if numBits > bitsLeft {
 		err = fmt.Errorf("get bits overflow, requireBits: %d, leftBits: %d", numBits, bitsLeft)
@@ -165,6 +172,9 @@ func (pd *perBitData) parseConstraintValue(valueRange int64) (value uint64, err 
 			}
 		}
 		value, err = pd.getBitsValue(i)
+		if err == nil && value >= uint64(valueRange) {
+			err = fmt.Errorf("constrained value %d is outside the range of %d values", value, valueRange)
+		}
 		return value, err
 	} else if valueRange == 256 {
 		bytes = 1
@@ -177,6 +187,9 @@ func (pd *perBitData) parseConstraintValue(valueRange int64) (value uint64, err 
 		return value, err
 	}
 	value, err = pd.getBitsValue(bytes * 8)
+	if err == nil && value >= uint64(valueRange) {
+		err = fmt.Errorf("constrained value %d is outside the range of %d values", value, valueRange)
+	}
 	return value, err
 }
 
@@ -188,6 +201,10 @@ func (pd *perBitData) parseSemiConstrainedWholeNumber(lb uint64) (value uint64, 
 	}
 	if length > 8 || repeat {
 		return value, fmt.Errorf("too long length: %d", length)
+	}
+	// The value is encoded in at least one octet (X.691 #10.3.8 / #10.7.4).
+	if length == 0 {
+		return value, fmt.Errorf("zero-length semi-constrained whole number")
 	}
 	if value, err = pd.getBitsValue(uint(length) * 8); err != nil {
 		return value, err
@@ -244,6 +261,15 @@ func (pd *perBitData) parseLength(sizeRange int64, repeat *bool) (value uint64, 
 	*repeat = true
 	value = 16384 * firstByte
 	return value, err
+}
+
+// checkDecodedSize rejects a decoded BIT/OCTET STRING size outside the declared SIZE constraint.
+// lb and ub must be the root bounds (0 and -1 when the size extension bit is set).
+func checkDecodedSize(kind string, size uint64, lb, ub int64) error {
+	if size < uint64(lb) || (ub >= 0 && size > uint64(ub)) {
+		return fmt.Errorf("%s size %d is outside the size constraint (%d..%d)", kind, size, lb, ub)
+	}
+	return nil
 }
 
 func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperBoundPtr *int64) (BitString, error) {
@@ -310,6 +336,10 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 		}
 		perTraceFmt(2, "Decoding BIT STRING size %d", rawLength)
 		if rawLength == 0 {
+			// Zero-length final fragment: validate what was accumulated so far.
+			if err := checkDecodedSize("BIT STRING", bitString.BitLength, lb, ub); err != nil {
+				return bitString, err
+			}
 			return bitString, nil
 		}
 		sizes := (rawLength + 7) >> 3
@@ -336,6 +366,9 @@ func (pd *perBitData) parseBitString(extensed bool, lowerBoundPtr *int64, upperB
 			// }
 			break
 		}
+	}
+	if err := checkDecodedSize("BIT STRING", bitString.BitLength, lb, ub); err != nil {
+		return bitString, err
 	}
 	// Mask the unused trailing bits of the final byte. The appended bytes are
 	// copied from pd.bytes, so the last byte may still hold the leading bits of
@@ -402,6 +435,10 @@ func (pd *perBitData) parseOctetString(extensed bool, lowerBoundPtr *int64, uppe
 		}
 		perTraceFmt(2, "Decoding OCTET STRING size %d", rawLength)
 		if rawLength == 0 {
+			// Zero-length final fragment: validate what was accumulated so far.
+			if err := checkDecodedSize("OCTET STRING", uint64(len(octetString)), lb, ub); err != nil {
+				return octetString, err
+			}
 			return octetString, nil
 		} else if err := pd.parseAlignBits(); err != nil {
 			return octetString, err
@@ -419,6 +456,9 @@ func (pd *perBitData) parseOctetString(extensed bool, lowerBoundPtr *int64, uppe
 			// }
 			break
 		}
+	}
+	if err := checkDecodedSize("OCTET STRING", uint64(len(octetString)), lb, ub); err != nil {
+		return octetString, err
 	}
 	return octetString, nil
 }
@@ -509,6 +549,9 @@ func (pd *perBitData) parseInteger(extensed bool, lowerBoundPtr *int64, upperBou
 			return int64(0), err
 		}
 	}
+	if rawLength == 0 {
+		return int64(0), fmt.Errorf("INTEGER with zero-length encoding")
+	}
 	perTraceFmt(2, "Decoding INTEGER Length with %d bytes", rawLength)
 
 	if rawValue, err := pd.getBitsValue(rawLength * 8); err != nil {
@@ -574,6 +617,18 @@ func (pd *perBitData) parseSequenceOf(sizeExtensed bool, params fieldParameters,
 		perTraceFmt(3, "Decoding Length of \"SEQUENCE OF\" with Semi-Constraint Range(%d..)", lb)
 	}
 
+	// Root bounds of the component count, captured before the element parameters
+	// are cleared. They are not in effect when the size extension bit is set.
+	minElements, maxElements := uint64(0), uint64(maxUnboundedSequenceOf)
+	if !sizeExtensed {
+		// Read the declared bound: lb above is only set when it is below 64K.
+		if params.sizeLowerBound != nil {
+			minElements = uint64(*params.sizeLowerBound)
+		}
+		if params.sizeUpperBound != nil {
+			maxElements = uint64(*params.sizeUpperBound)
+		}
+	}
 	params.sizeExtensible = false
 	params.sizeUpperBound = nil
 	params.sizeLowerBound = nil
@@ -582,12 +637,16 @@ func (pd *perBitData) parseSequenceOf(sizeExtensed bool, params fieldParameters,
 	if sizeRange <= 0 {
 		// X.691 #11.9.3.8: the count is a general length determinant, possibly
 		// fragmented. Grow the slice per element so that memory is bounded by the
-		// data actually present instead of the declared count.
+		// data actually present instead of the declared count, and bound the total
+		// before each fragment is parsed since components may occupy zero bits.
 		sliceContent = reflect.MakeSlice(sliceType, 0, 0)
 		for repeat := true; repeat; {
 			numElements, err := pd.parseLength(-1, &repeat)
 			if err != nil {
 				return sliceContent, err
+			}
+			if numElements > maxElements-uint64(sliceContent.Len()) {
+				return sliceContent, fmt.Errorf("SEQUENCE OF has more than %d components", maxElements)
 			}
 			perTraceFmt(2, "Decoding  \"SEQUENCE OF\" struct %s with len(%d)", elemType.Name(), numElements)
 			for j := uint64(0); j < numElements; j++ {
@@ -597,6 +656,10 @@ func (pd *perBitData) parseSequenceOf(sizeExtensed bool, params fieldParameters,
 				}
 				sliceContent = reflect.Append(sliceContent, elem)
 			}
+		}
+		if uint64(sliceContent.Len()) < minElements {
+			return sliceContent, fmt.Errorf("SEQUENCE OF has %d components, fewer than the minimum %d",
+				sliceContent.Len(), minElements)
 		}
 		return sliceContent, nil
 	}
@@ -610,6 +673,10 @@ func (pd *perBitData) parseSequenceOf(sizeExtensed bool, params fieldParameters,
 		numElements = numElementsTmp
 	}
 	numElements += uint64(lb)
+	if numElements < minElements || numElements > maxElements {
+		return sliceContent, fmt.Errorf("SEQUENCE OF has %d components, outside the size constraint (%d..%d)",
+			numElements, minElements, maxElements)
+	}
 	perTraceFmt(2, "Decoding  \"SEQUENCE OF\" struct %s with len(%d)", elemType.Name(), numElements)
 	intNumElements := int(numElements)
 	sliceContent = reflect.MakeSlice(sliceType, intNumElements, intNumElements)
@@ -690,6 +757,11 @@ func (pd *perBitData) parseOpenType(skip bool, v reflect.Value, params fieldPara
 			break
 		}
 	}
+	// The contents of an open type are a complete encoding of at least one octet (X.691 #10.2.1),
+	// including those of unknown types that are skipped.
+	if len(pdOpenType.bytes) == 0 {
+		return fmt.Errorf("empty open type")
+	}
 	if skip {
 		perTraceFmt(2, "Skip OpenType (len = %d byte)", len(pdOpenType.bytes))
 		return nil
@@ -707,10 +779,9 @@ func (pd *perBitData) parseOpenType(skip bool, v reflect.Value, params fieldPara
 func parseField(v reflect.Value, pd *perBitData, params fieldParameters) error {
 	fieldType := v.Type()
 
-	// If we have run out of data return error.
-	if pd.byteOffset == uint64(len(pd.bytes)) {
-		return fmt.Errorf("sequence truncated")
-	}
+	// Running out of data is reported by the readers of the individual fields. A check here
+	// would wrongly reject zero-bit values (e.g. INTEGER (0..0)) that end exactly at the data end.
+	// An entirely empty encoding is rejected by the callers (UnmarshalWithParams, parseOpenType).
 	if v.Kind() == reflect.Pointer {
 		ptr := reflect.New(fieldType.Elem())
 		v.Set(ptr)
@@ -963,6 +1034,10 @@ func Unmarshal(b []byte, value any) error {
 // UnmarshalWithParams allows field parameters to be specified for the
 // top-level element. The form of the params is the same as the field tags.
 func UnmarshalWithParams(b []byte, value any, params string) error {
+	// A complete encoding has at least one octet (X.691 #10.1.3).
+	if len(b) == 0 {
+		return fmt.Errorf("empty encoding")
+	}
 	v := reflect.ValueOf(value).Elem()
 	pd := &perBitData{b, 0, 0}
 	return parseField(v, pd, parseFieldParameters(params))
