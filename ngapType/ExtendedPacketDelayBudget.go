@@ -10,5 +10,5 @@ From ASN.1 module "NGAP-IEs" found in "38413-i10.asn1"
 package ngapType
 
 type ExtendedPacketDelayBudget struct {
-	Value int64 `aper:"valueExt,valueLB:1,valueUB:109999"`
+	Value int64 `aper:"valueExt,valueLB:1,valueUB:65535"`
 }

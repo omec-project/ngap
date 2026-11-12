@@ -10,5 +10,5 @@ From ASN.1 module "NGAP-IEs" found in "38413-i10.asn1"
 package ngapType
 
 type MaximumDataBurstVolume struct {
-	Value int64 `aper:"valueExt,valueLB:0,valueUB:2000000"`
+	Value int64 `aper:"valueExt,valueLB:0,valueUB:4095"`
 }
